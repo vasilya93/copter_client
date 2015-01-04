@@ -45,6 +45,29 @@ private:
         m_nGyroYLast,
         m_nGyroZLast;
     int m_nRenewStatus;
+
+    int m_nAccXCalibrationAccum,
+        m_nAccYCalibrationAccum,
+        m_nAccZCalibrationAccum,
+        m_nGyroXCalibrationAccum,
+        m_nGyroYCalibrationAccum,
+        m_nGyroZCalibrationAccum;
+
+    int m_nAccXCalibrationCounter,
+        m_nAccYCalibrationCounter,
+        m_nAccZCalibrationCounter,
+        m_nGyroXCalibrationCounter,
+        m_nGyroYCalibrationCounter,
+        m_nGyroZCalibrationCounter;
+
+    int m_nAccXOffset,
+        m_nAccYOffset,
+        m_nAccZOffset,
+        m_nGyroXOffset,
+        m_nGyroYOffset,
+        m_nGyroZOffset;
+
+    const int SIZE_CALIBRATION_SET = 200;
 };
 
 #endif // DATAKEEPER_H

@@ -23,15 +23,21 @@ public slots:
     void slotUpdateGyroVectors(int nGyroX, int nGyroY, int nGyroZ);
 
 private:
-    QCustomPlot *m_plot;
+    QCustomPlot *m_plotAcc;
+    QCustomPlot *m_plotGyro;
     QPushButton *m_pButtonSendStart;
 
     QTimer *m_pTimerRedraw;
     QVector<double> m_vecX;
-    QVector<double> m_vecY1;
-    QVector<double> m_vecY2;
-    QVector<double> m_vecY3;
-    double m_fCurrentX;
+    QVector<double> m_vecXGyro;
+    QVector<double> m_vecAccX;
+    QVector<double> m_vecAccY;
+    QVector<double> m_vecAccZ;
+    QVector<double> m_vecGyroX;
+    QVector<double> m_vecGyroY;
+    QVector<double> m_vecGyroZ;
+    double m_fCurrentX,
+           m_fCurrentXGyro;
     CommManager *m_pCommManager;
 };
 
