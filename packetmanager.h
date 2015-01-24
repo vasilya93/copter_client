@@ -118,7 +118,7 @@ private:
     void ProcessDataDescription(unsigned char nHeader);
 
     DataKeeper *m_pDataKeeper;
-    CFifo m_fifoInput;
+    CFifo<unsigned char> m_fifoInput;
     Converter m_converter;
 
     unsigned int SIZE_PACKET = 5;

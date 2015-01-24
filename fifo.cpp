@@ -2,7 +2,8 @@
 #include <string.h>
 #include "fifo.h"
 
-CFifo::CFifo() :
+template <typename T>
+CFifo<T>::CFifo() :
     m_pArray(NULL),
     m_nSize(0),
     m_nIndexFirst(0),
@@ -14,14 +15,16 @@ CFifo::CFifo() :
 {
 }
 
-CFifo::~CFifo()
+template <typename T>
+CFifo<T>::~CFifo()
 {
     delete m_pArray;
 }
 
-int CFifo::Initialize(unsigned int nSize)
+template <typename T>
+int CFifo<T>::Initialize(unsigned int nSize)
 {
-    m_pArray = new unsigned char[nSize];
+    m_pArray = new T[nSize];
     if (m_pArray == NULL)
       return 1;
 
@@ -32,7 +35,8 @@ int CFifo::Initialize(unsigned int nSize)
     return 0;
 }
 
-int CFifo::PushArray(const unsigned char *pArray, unsigned int nSize)
+template <typename T>
+int CFifo<T>::PushArray(const T *pArray, unsigned int nSize)
 {
     unsigned long nLeftToEnd;
 
@@ -47,45 +51,54 @@ int CFifo::PushArray(const unsigned char *pArray, unsigned int nSize)
 
     nLeftToEnd = m_nSize - m_nIndexLast;
     if (nLeftToEnd >= nSize) {
-      memcpy(m_pArray + m_nIndexLast, pArray, nSize);
+      memcpy(m_pArray + m_nIndexLast, pArray, nSize * sizeof(T));
     } else {
-      memcpy(m_pArray + m_nIndexLast, pArray, nLeftToEnd);
-      memcpy(m_pArray, pArray + nLeftToEnd, nSize - nLeftToEnd);
+      memcpy(m_pArray + m_nIndexLast, pArray, nLeftToEnd * sizeof(T));
+      memcpy(m_pArray, pArray + nLeftToEnd, (nSize - nLeftToEnd) * sizeof(T));
     }
 
     IncreaseElemsCount(nSize);
     return 0;
 }
 
-int inline CFifo::Push(unsigned char nNewElem)
+template <typename T>
+int inline CFifo<T>::Push(T nNewElem)
 {
     if (m_pArray == NULL)
       return 1;
 
-    return PushArray(&nNewElem, 1);
+    if (IsFull())
+      DecreaseElemsCount(1);
+
+    m_pArray[m_nIndexLast] = nNewElem;
+
+    IncreaseElemsCount(1);
+    return 0;
 }
 
-unsigned char* CFifo::PopArray(unsigned int nSize)
+template <typename T>
+T *CFifo<T>::PopArray(unsigned int nSize)
 {
     if (nSize > m_nOccupiedElems)
         return NULL;
 
-    unsigned char *pArray = new unsigned char[nSize];
+    T *pArray = new T[nSize];
     unsigned int nLeftToEnd = m_nSize - m_nIndexFirst;
     if (nLeftToEnd >= nSize) {
-      memcpy(pArray, m_pArray + m_nIndexFirst, nSize);
+      memcpy(pArray, m_pArray + m_nIndexFirst, nSize * sizeof(T));
     } else {
-      memcpy(pArray, m_pArray + m_nIndexFirst, nLeftToEnd);
-      memcpy(pArray + nLeftToEnd, m_pArray, nSize - nLeftToEnd);
+      memcpy(pArray, m_pArray + m_nIndexFirst, nLeftToEnd * sizeof(T));
+      memcpy(pArray + nLeftToEnd, m_pArray, (nSize - nLeftToEnd) * sizeof(T));
     }
 
     DecreaseElemsCount(nSize);
     return pArray;
 }
 
-unsigned char CFifo::Pop()
+template <typename T>
+T CFifo<T>::Pop()
 {
-    unsigned char nChar = '\0';
+    T nChar = (T) 0;
 
     if ((m_pArray == NULL) || m_bIsEmpty)
       return nChar;
@@ -95,7 +108,8 @@ unsigned char CFifo::Pop()
     return nChar;
 }
 
-int CFifo::Reset()
+template <typename T>
+int CFifo<T>::Reset()
 {
     if (m_pArray == NULL)
       return 1;
@@ -109,11 +123,12 @@ int CFifo::Reset()
     return 0;
 }
 
-unsigned char *CFifo::GetData(unsigned int *nSize)
+template <typename T>
+T *CFifo<T>::GetData(unsigned int *nSize)
 {
     unsigned int nLeftToEnd = m_nSize - m_nIndexFirst;
     unsigned int nElemsCount = m_nSize - m_nFreeElems;
-    unsigned char *pData = new unsigned char(nElemsCount);
+    T *pData = new T[nElemsCount];
     if (pData == NULL) {
         if (nSize != NULL)
             *nSize = 0;
@@ -121,10 +136,10 @@ unsigned char *CFifo::GetData(unsigned int *nSize)
     }
 
     if (nLeftToEnd >= nElemsCount) {
-      memcpy(pData, m_pArray + m_nIndexFirst, nElemsCount);
+      memcpy(pData, m_pArray + m_nIndexFirst, sizeof(T) * nElemsCount);
     } else {
-      memcpy(pData, m_pArray + m_nIndexFirst, nLeftToEnd);
-      memcpy(pData + nLeftToEnd, m_pArray, nElemsCount - nLeftToEnd);
+      memcpy(pData, m_pArray + m_nIndexFirst, sizeof(T) * nLeftToEnd);
+      memcpy(pData + nLeftToEnd, m_pArray, sizeof(T) * (nElemsCount - nLeftToEnd));
     }
 
     if (nSize != NULL)
@@ -133,7 +148,8 @@ unsigned char *CFifo::GetData(unsigned int *nSize)
     return pData;
 }
 
-void CFifo::IncreaseElemsCount(unsigned int nValueAdded)
+template <typename T>
+void CFifo<T>::IncreaseElemsCount(unsigned int nValueAdded)
 {
     m_nIndexLast += nValueAdded;
     if (m_nIndexLast >= m_nSize)
@@ -146,7 +162,8 @@ void CFifo::IncreaseElemsCount(unsigned int nValueAdded)
       m_bIsFull = true;
 }
 
-void CFifo::DecreaseElemsCount(unsigned int nValueAdded)
+template <typename T>
+void CFifo<T>::DecreaseElemsCount(unsigned int nValueAdded)
 {
     m_nIndexFirst += nValueAdded;
     if (m_nIndexFirst >= m_nSize)
@@ -158,3 +175,6 @@ void CFifo::DecreaseElemsCount(unsigned int nValueAdded)
     if (m_nIndexFirst == m_nIndexLast)
       m_bIsEmpty = true;
 }
+
+template class CFifo<int>;
+template class CFifo<unsigned char>;

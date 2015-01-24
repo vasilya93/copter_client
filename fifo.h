@@ -1,6 +1,7 @@
 #ifndef FIFO_H
 #define FIFO_H
 
+template <typename T>
 class CFifo
 {
 public:
@@ -8,18 +9,18 @@ public:
     ~CFifo();
 
     int Initialize(unsigned int nSize);
-    int PushArray(const unsigned char *pArray, unsigned int nSize);
-    int inline Push(unsigned char nNewElem);
-    unsigned char* PopArray(unsigned int nSize);
-    unsigned char Pop();
+    int PushArray(const T *pArray, unsigned int nSize);
+    int inline Push(T nNewElem);
+    T* PopArray(unsigned int nSize);
+    T Pop();
     int Reset();
-    unsigned char *GetData(unsigned int *nSize);
+    T *GetData(unsigned int *nSize);
 
-    inline int IsFull()
+    inline bool IsFull()
     {
         return m_bIsFull;
     }
-    inline int IsEmpty()
+    inline bool IsEmpty()
     {
         return m_bIsEmpty;
     }
@@ -33,7 +34,7 @@ private:
     void DecreaseElemsCount(unsigned int nValueAdded);
 
 private:
-    unsigned char* m_pArray;
+    T* m_pArray;
     unsigned int m_nSize,
                  m_nIndexFirst,
                  m_nIndexLast,

@@ -70,6 +70,18 @@ void PacketManager::ProcessDataDescription(unsigned char nHeader)
     case MSNR_DD_ANGSPEEDZ:
         m_pDataKeeper->SetGyroZ(m_converter.Short);
         break;
+    case MSNR_DD_GYROXOFF:
+        //m_pDataKeeper->SetGyroX(m_converter.Short);
+        break;
+    case MSNR_DD_GYROYOFF:
+        //m_pDataKeeper->SetGyroY(m_converter.Short);
+        //m_pDataKeeper->SetGyroZ(m_converter.Short);
+        break;
+    case MSNR_DD_ACCELXOFF:
+        //m_pDataKeeper->SetAccX(m_converter.Short);
+        //m_pDataKeeper->SetAccY(m_converter.Short);
+        //m_pDataKeeper->SetAccZ(m_converter.Short);
+        break;
     /*case MSNR_DD_DCM11:
         _dataKeeper.setDCM11(_converter.RealNum);
         break;
