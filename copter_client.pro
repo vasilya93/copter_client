@@ -19,7 +19,9 @@ SOURCES += main.cpp\
     SerialComm.cpp \
     ClientView.cpp \
     packetmanager.cpp \
-    datakeeper.cpp
+    datakeeper.cpp \
+    vec3.cpp \
+    orientationindicator.cpp
 
 HEADERS  += ClientView.h \
     fifo.h \
@@ -27,6 +29,8 @@ HEADERS  += ClientView.h \
     commmanager.h \
     SerialComm.h \
     packetmanager.h \
-    datakeeper.h
+    datakeeper.h \
+    vec3.h \
+    orientationindicator.h
 
 QMAKE_CXXFLAGS += -std=c++11

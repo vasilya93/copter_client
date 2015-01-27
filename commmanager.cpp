@@ -36,4 +36,15 @@ void CommManager::SerialBytesReceivedHandler(unsigned char *pBytesReceived, unsi
         m_pDataKeeper->GetGyro(nGyroX, nGyroY, nGyroZ);
         emit signalRenewGyro(nGyroX, nGyroY, nGyroZ);
     }
+
+    if (m_pDataKeeper->IsDCMReady()) {
+        vec3 vec3ITiedCurrent, vec3JTiedCurrent, vec3KTiedCurrent;
+        float fRoll, fPitch, fYaw;
+        m_pDataKeeper->GetDCM(vec3ITiedCurrent, vec3JTiedCurrent, vec3KTiedCurrent);
+        m_pDataKeeper->GetAngles(fRoll, fPitch, fYaw);
+        emit signalRenewDCM(vec3ITiedCurrent.x, vec3ITiedCurrent.y, vec3ITiedCurrent.z,
+                            vec3JTiedCurrent.x, vec3JTiedCurrent.y, vec3JTiedCurrent.z,
+                            vec3KTiedCurrent.x, vec3KTiedCurrent.y, vec3KTiedCurrent.z,
+                            fRoll, fPitch, fYaw);
+    }
 }

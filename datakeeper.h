@@ -3,6 +3,7 @@
 
 #include <vector>
 #include "fifo.h"
+#include "vec3.h"
 
 class DataKeeper
 {
@@ -20,9 +21,15 @@ public:
 
     void GetAcc(int &nAccX, int &nAccY, int &nAccZ);
     void GetGyro(int &nGyroX, int &nGyroY, int &nGyroZ);
+    void GetDCM(vec3 &vec3ITiedCurrent, vec3 &vec3JTiedCurrent, vec3 &vec3KTiedCurrent);
+    void GetAngles(float &fRoll, float &fPitch, float &fYaw);
 
     bool IsAccReady();
     bool IsGyroReady();
+    inline bool IsDCMReady()
+    {
+        return m_nRenewStatus & DCM_RENEWED;
+    }
 
 private:
     int FilterValue(int nCurrentValue, CFifo<int> *fifoFiltrationWindiow);
@@ -37,12 +44,8 @@ private:
         ACCZ_RENEWED = 1 << 2,
         GYROX_RENEWED = 1 << 3,
         GYROY_RENEWED = 1 << 4,
-        GYROZ_RENEWED = 1 << 5
-    };
-    enum {
-        ACCX_READY = 1 << 0,
-        ACCY_READY = 1 << 1,
-        ACCZ_READY = 1 << 2
+        GYROZ_RENEWED = 1 << 5,
+        DCM_RENEWED = 1 << 6
     };
     enum FiltrationType {
         FILTRATION_MEDIAN,
@@ -63,7 +66,6 @@ private:
         m_nGyroYLast,
         m_nGyroZLast;
     int m_nRenewStatus;
-    int m_nReadyStatus;
 
     //----Calibration elements----
     int m_nAccXCalibrationAccum,
@@ -97,12 +99,24 @@ private:
 
     int (DataKeeper::*GetWindowWeightedValue)(int *);
 
+    //----Fusion elements-----
+    vec3 m_vec3ITiedCurrent;
+    vec3 m_vec3ITiedPrevious;
+    vec3 m_vec3JTiedCurrent;
+    vec3 m_vec3JTiedPrevious;
+    vec3 m_vec3KTiedCurrent;
+    vec3 m_vec3KTiedPrevious;
+
+    float m_fRollCurrent,
+          m_fPitchCurrent,
+          m_fYawCurrent;
+
     //----Constants----
     const int SIZE_CALIBRATION_SET = 200;
     const int SIZE_AVERAGING_WINDOW = 21;
     const unsigned int POSITION_MEDIAN = 10;
-    const bool DO_FILTER = false;
-    const FiltrationType FILTRATION_TYPE = FILTRATION_AVERAGE;
+    const bool DO_FILTER = true;
+    const FiltrationType FILTRATION_TYPE = FILTRATION_MEDIAN;
     const int UNIT_ACCELERATION = 16384;
 };
 

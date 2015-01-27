@@ -5,6 +5,7 @@
 #include "SerialComm.h"
 #include "packetmanager.h"
 #include "datakeeper.h"
+#include "vec3.h"
 
 class CommManager : public QObject, protected SerialCommSubscribable
 {
@@ -25,6 +26,10 @@ public:
 signals:
     void signalRenewAccel(int, int, int);
     void signalRenewGyro(int, int, int);
+    void signalRenewDCM(float fIi, float fIj, float fIk,
+                        float fJi, float fJj, float fJk,
+                        float fKi, float fKj, float fKk,
+                        float fRoll, float fPitch, float fYaw);
 
 protected:
     virtual void SerialBytesReceivedHandler(unsigned char*, unsigned int);

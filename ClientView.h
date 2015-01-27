@@ -5,8 +5,10 @@
 #include <QTimer>
 #include <QVector>
 #include <QPushButton>
+#include <QTextEdit>
 #include "qcustomplot.h"
 #include "commmanager.h"
+#include "orientationindicator.h"
 
 class ClientView : public QWidget
 {
@@ -21,12 +23,19 @@ public slots:
     void slotUpdateGraphView();
     void slotUpdateAccVectors(int nAccX, int nAccY, int nAccZ);
     void slotUpdateGyroVectors(int nGyroX, int nGyroY, int nGyroZ);
+    void slotShowDCM(float fIi, float fIj, float fIk,
+                     float fJi, float fJj, float fJk,
+                     float fKi, float fKj, float fKk,
+                     float fRoll, float fPitch, float fYaw);
 
 private:
     QCustomPlot *m_plotAcc;
     QCustomPlot *m_plotGyro;
+    QTextEdit *m_editDCM;
     QPushButton *m_pButtonSendStart;
-
+    OrientationIndicator *m_pIndicatorRoll,
+                         *m_pIndicatorPitch,
+                         *m_pIndicatorYaw;
     QTimer *m_pTimerRedraw;
     QVector<double> m_vecX;
     QVector<double> m_vecXGyro;
@@ -39,6 +48,8 @@ private:
     double m_fCurrentX,
            m_fCurrentXGyro;
     CommManager *m_pCommManager;
+
+    bool m_bDoAllowEdit;
 };
 
 #endif // CLIENTVIEW_H

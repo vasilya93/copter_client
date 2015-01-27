@@ -1,11 +1,13 @@
 #include <QVBoxLayout>
+#include <QHBoxLayout>
 #include <math.h>
 #include "ClientView.h"
 
 ClientView::ClientView(QWidget *parent)
     : QWidget(parent),
       m_fCurrentX(0),
-      m_fCurrentXGyro(0)
+      m_fCurrentXGyro(0),
+      m_bDoAllowEdit(true)
 {
     m_plotAcc = new QCustomPlot;
     m_plotGyro = new QCustomPlot;
@@ -73,15 +75,39 @@ ClientView::ClientView(QWidget *parent)
 
     m_pButtonSendStart = new QPushButton("Start");
 
-    QVBoxLayout *layout = new QVBoxLayout;
-    layout->addWidget(m_plotAcc);
-    layout->addWidget(m_plotGyro);
-    layout->addWidget(m_pButtonSendStart);
+    m_editDCM = new QTextEdit;
+    m_editDCM->setFixedHeight(70);
+    m_editDCM->setReadOnly(true);
+
+    m_pIndicatorRoll = new OrientationIndicator;
+    m_pIndicatorPitch = new OrientationIndicator;
+    m_pIndicatorYaw = new OrientationIndicator;
+
+    QVBoxLayout *layoutFirstColumn = new QVBoxLayout;
+    layoutFirstColumn->addWidget(m_plotAcc);
+    layoutFirstColumn->addWidget(m_plotGyro);
+    layoutFirstColumn->addWidget(m_pButtonSendStart);
+
+    QVBoxLayout *layoutSecondColumn = new QVBoxLayout;
+    layoutSecondColumn->addWidget(m_pIndicatorRoll);
+    layoutSecondColumn->addWidget(m_pIndicatorPitch);
+    layoutSecondColumn->addWidget(m_pIndicatorYaw);
+    layoutSecondColumn->addWidget(m_editDCM);
+
+    QHBoxLayout *layout = new QHBoxLayout;
+    layout->addLayout(layoutFirstColumn, 3);
+    layout->addLayout(layoutSecondColumn, 1);
     setLayout(layout);
+
+    bool bIsConnectSuccess;
 
     connect(m_pTimerRedraw, SIGNAL(timeout()), this, SLOT(slotUpdateGraphView()));
     connect(m_pCommManager, SIGNAL(signalRenewAccel(int,int,int)), this, SLOT(slotUpdateAccVectors(int,int,int)));
     connect(m_pCommManager, SIGNAL(signalRenewGyro(int,int,int)), this, SLOT(slotUpdateGyroVectors(int,int,int)));
+    bIsConnectSuccess = connect(m_pCommManager,
+                                SIGNAL(signalRenewDCM(float, float, float, float, float, float, float, float, float, float, float, float)),
+                                this,
+                                SLOT(slotShowDCM(float, float, float, float, float, float, float, float, float, float, float, float)));
     connect(m_pButtonSendStart, SIGNAL(clicked()), this, SLOT(slotSendStart()));
 
     m_pCommManager->Connect();
@@ -93,11 +119,42 @@ ClientView::~ClientView()
 {
     delete m_pTimerRedraw;
     delete m_pCommManager;
+    delete m_pIndicatorRoll;
+    delete m_pIndicatorPitch;
+    delete m_pIndicatorYaw;
 }
 
 void ClientView::slotSendStart()
 {
     m_pCommManager->SendStart();
+}
+
+void ClientView::slotShowDCM(float fIi, float fIj, float fIk,
+                             float fJi, float fJj, float fJk,
+                             float fKi, float fKj, float fKk,
+                             float fRoll, float fPitch, float fYaw)
+{
+    QString szFirstLine = QString::number(fIi, 'f', 6) + "\t" +
+                          QString::number(fIj, 'f', 6) + "\t" +
+                          QString::number(fIk, 'f', 6) + "\t\t" +
+                          QString::number(fRoll);
+    QString szSecondLine = QString::number(fJi, 'f', 6) + "\t" +
+                           QString::number(fJj, 'f', 6) + "\t" +
+                           QString::number(fJk, 'f', 6) + "\t\t" +
+                           QString::number(fPitch);
+    QString szThirdLine = QString::number(fKi, 'f', 6) + "\t" +
+                          QString::number(fKj, 'f', 6) + "\t" +
+                          QString::number(fKk, 'f', 6) + "\t\t" +
+                          QString::number(fYaw);
+
+    m_editDCM->setText(szFirstLine);
+    m_editDCM->append(szSecondLine);
+    m_editDCM->append(szThirdLine);
+
+    m_pIndicatorRoll->SetOrientation(fRoll);
+    m_pIndicatorPitch->SetOrientation(fPitch);
+    m_pIndicatorYaw->SetOrientation(fYaw);
+
 }
 
 void ClientView::slotUpdateGraphView()
