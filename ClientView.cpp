@@ -75,6 +75,9 @@ ClientView::ClientView(QWidget *parent)
 
     m_pButtonSendStart = new QPushButton("Start");
 
+    m_pLabelTimeGap = new QLabel("No timegap");
+    m_pLabelTimeGap->setFixedHeight(20);
+
     m_editDCM = new QTextEdit;
     m_editDCM->setFixedHeight(70);
     m_editDCM->setReadOnly(true);
@@ -87,6 +90,7 @@ ClientView::ClientView(QWidget *parent)
     layoutFirstColumn->addWidget(m_plotAcc);
     layoutFirstColumn->addWidget(m_plotGyro);
     layoutFirstColumn->addWidget(m_pButtonSendStart);
+    layoutFirstColumn->addWidget(m_pLabelTimeGap);
 
     QVBoxLayout *layoutSecondColumn = new QVBoxLayout;
     layoutSecondColumn->addWidget(m_pIndicatorRoll);
@@ -99,16 +103,16 @@ ClientView::ClientView(QWidget *parent)
     layout->addLayout(layoutSecondColumn, 1);
     setLayout(layout);
 
-    bool bIsConnectSuccess;
 
     connect(m_pTimerRedraw, SIGNAL(timeout()), this, SLOT(slotUpdateGraphView()));
     connect(m_pCommManager, SIGNAL(signalRenewAccel(int,int,int)), this, SLOT(slotUpdateAccVectors(int,int,int)));
     connect(m_pCommManager, SIGNAL(signalRenewGyro(int,int,int)), this, SLOT(slotUpdateGyroVectors(int,int,int)));
-    bIsConnectSuccess = connect(m_pCommManager,
+    connect(m_pCommManager,
                                 SIGNAL(signalRenewDCM(float, float, float, float, float, float, float, float, float, float, float, float)),
                                 this,
                                 SLOT(slotShowDCM(float, float, float, float, float, float, float, float, float, float, float, float)));
     connect(m_pButtonSendStart, SIGNAL(clicked()), this, SLOT(slotSendStart()));
+    connect(m_pCommManager, SIGNAL(signalRenewTimeGap(unsigned long long)), this, SLOT(slotUpdateTimeGap(unsigned long long)));
 
     m_pCommManager->Connect();
 
@@ -122,6 +126,7 @@ ClientView::~ClientView()
     delete m_pIndicatorRoll;
     delete m_pIndicatorPitch;
     delete m_pIndicatorYaw;
+    delete m_pLabelTimeGap;
 }
 
 void ClientView::slotSendStart()
@@ -155,6 +160,11 @@ void ClientView::slotShowDCM(float fIi, float fIj, float fIk,
     m_pIndicatorPitch->SetOrientation(fPitch);
     m_pIndicatorYaw->SetOrientation(fYaw);
 
+}
+
+void ClientView::slotUpdateTimeGap(unsigned long long nTimeGap)
+{
+    m_pLabelTimeGap->setText("Time gap is " + QString::number(nTimeGap/1000) + "\tusec");
 }
 
 void ClientView::slotUpdateGraphView()

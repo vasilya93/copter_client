@@ -2,6 +2,7 @@
 #define DATAKEEPER_H
 
 #include <vector>
+#include <sys/time.h>
 #include "fifo.h"
 #include "vec3.h"
 
@@ -23,6 +24,10 @@ public:
     void GetGyro(int &nGyroX, int &nGyroY, int &nGyroZ);
     void GetDCM(vec3 &vec3ITiedCurrent, vec3 &vec3JTiedCurrent, vec3 &vec3KTiedCurrent);
     void GetAngles(float &fRoll, float &fPitch, float &fYaw);
+    inline unsigned long long GetTimeGap()
+    {
+        return m_nTimeGap;
+    }
 
     bool IsAccReady();
     bool IsGyroReady();
@@ -111,8 +116,11 @@ private:
           m_fPitchCurrent,
           m_fYawCurrent;
 
+    timeval m_timePrevious;
+    unsigned long long m_nTimeGap;
+
     //----Constants----
-    const int SIZE_CALIBRATION_SET = 200;
+    const int SIZE_CALIBRATION_SET = 5;
     const int SIZE_AVERAGING_WINDOW = 21;
     const unsigned int POSITION_MEDIAN = 10;
     const bool DO_FILTER = true;

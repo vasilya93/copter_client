@@ -30,6 +30,7 @@ signals:
                         float fJi, float fJj, float fJk,
                         float fKi, float fKj, float fKk,
                         float fRoll, float fPitch, float fYaw);
+    void signalRenewTimeGap(unsigned long long);
 
 protected:
     virtual void SerialBytesReceivedHandler(unsigned char*, unsigned int);

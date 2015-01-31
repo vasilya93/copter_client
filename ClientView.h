@@ -6,6 +6,7 @@
 #include <QVector>
 #include <QPushButton>
 #include <QTextEdit>
+#include <QLabel>
 #include "qcustomplot.h"
 #include "commmanager.h"
 #include "orientationindicator.h"
@@ -27,8 +28,10 @@ public slots:
                      float fJi, float fJj, float fJk,
                      float fKi, float fKj, float fKk,
                      float fRoll, float fPitch, float fYaw);
+    void slotUpdateTimeGap(unsigned long long);
 
 private:
+    QLabel *m_pLabelTimeGap;
     QCustomPlot *m_plotAcc;
     QCustomPlot *m_plotGyro;
     QTextEdit *m_editDCM;

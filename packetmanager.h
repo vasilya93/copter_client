@@ -52,7 +52,10 @@ private:
         MSNR_DD_HMC5883_IDC = 0x6C,
         MSNR_DD_SENSFUS_ACCXNORM = 0x70,
         MSNR_DD_SENSFUS_ACCYNORM = 0x74,
-        MSNR_DD_SENSFUS_ACCZNORM = 0x78
+        MSNR_DD_SENSFUS_ACCZNORM = 0x78,
+        MSNR_DD_SENSFUS_ROLL = 0x7C,
+        MSNR_DD_SENSFUS_PITCH = 0x80,
+        MSNR_DD_SENSFUS_YAW = 0x84
     };
 
     enum {

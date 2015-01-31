@@ -46,5 +46,6 @@ void CommManager::SerialBytesReceivedHandler(unsigned char *pBytesReceived, unsi
                             vec3JTiedCurrent.x, vec3JTiedCurrent.y, vec3JTiedCurrent.z,
                             vec3KTiedCurrent.x, vec3KTiedCurrent.y, vec3KTiedCurrent.z,
                             fRoll, fPitch, fYaw);
+        emit signalRenewTimeGap(m_pDataKeeper->GetTimeGap());
     }
 }

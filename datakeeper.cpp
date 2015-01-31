@@ -32,7 +32,8 @@ DataKeeper::DataKeeper() :
     m_nGyroZOffset(0),
     m_vec3ITiedPrevious(1, 0, 0),
     m_vec3JTiedPrevious(0, 1, 0),
-    m_vec3KTiedPrevious(0, 0, 1)
+    m_vec3KTiedPrevious(0, 0, 1),
+    m_nTimeGap(0)
 {
     m_fifoAccXFiltration.Initialize(SIZE_AVERAGING_WINDOW);
     m_fifoAccYFiltration.Initialize(SIZE_AVERAGING_WINDOW);
@@ -49,6 +50,8 @@ DataKeeper::DataKeeper() :
         GetWindowWeightedValue = &DataKeeper::GetWindowMedian;
         break;
     }
+    
+    gettimeofday(&m_timePrevious, NULL);
 }
 
 DataKeeper::~DataKeeper()
@@ -68,6 +71,8 @@ void DataKeeper::SetGyroX(int nGyroX)
     m_nGyroXLast = FilterValue(nAlignedGyroX, &m_fifoGyroXFiltration);
     m_vecGyroX.push_back(m_nGyroXLast);
     m_nRenewStatus |= GYROX_RENEWED;
+    
+    TryFusion();
 }
 
 void DataKeeper::SetGyroY(int nGyroY)
@@ -83,6 +88,8 @@ void DataKeeper::SetGyroY(int nGyroY)
     m_nGyroYLast = FilterValue(nAlignedGyroY, &m_fifoGyroYFiltration);
     m_vecGyroY.push_back(m_nGyroYLast);
     m_nRenewStatus |= GYROY_RENEWED;
+    
+    TryFusion();
 }
 
 void DataKeeper::SetGyroZ(int nGyroZ)
@@ -98,6 +105,8 @@ void DataKeeper::SetGyroZ(int nGyroZ)
     m_nGyroZLast = FilterValue(nAlignedGyroZ, &m_fifoGyroZFiltration);
     m_vecGyroZ.push_back(m_nGyroZLast);
     m_nRenewStatus |= GYROZ_RENEWED;
+    
+    TryFusion();
 }
 
 void DataKeeper::SetAccX(int nAccX)
@@ -238,11 +247,20 @@ void DataKeeper::TryFusion()
     vec3 vec3dTheta,
          vec3Aux;
     float fCorrectionLength;
+    timeval timeCurrent;
 
     if ((~m_nRenewStatus & ACCX_RENEWED) ||
         (~m_nRenewStatus & ACCY_RENEWED) ||
-        (~m_nRenewStatus & ACCZ_RENEWED))
+        (~m_nRenewStatus & ACCZ_RENEWED) ||
+        (~m_nRenewStatus & GYROX_RENEWED) ||
+        (~m_nRenewStatus & GYROY_RENEWED) ||
+        (~m_nRenewStatus & GYROZ_RENEWED))
         return;
+    
+    gettimeofday(&timeCurrent, NULL);
+    m_nTimeGap = (timeCurrent.tv_sec - m_timePrevious.tv_sec) * 1000000 +
+              timeCurrent.tv_usec - m_timePrevious.tv_usec;
+    m_timePrevious = timeCurrent;
 
     m_vec3KTiedCurrent.x = m_nAccXLast;
     m_vec3KTiedCurrent.y = m_nAccYLast;
