@@ -108,9 +108,10 @@ ClientView::ClientView(QWidget *parent)
     connect(m_pCommManager, SIGNAL(signalRenewAccel(int,int,int)), this, SLOT(slotUpdateAccVectors(int,int,int)));
     connect(m_pCommManager, SIGNAL(signalRenewGyro(int,int,int)), this, SLOT(slotUpdateGyroVectors(int,int,int)));
     connect(m_pCommManager,
-                                SIGNAL(signalRenewDCM(float, float, float, float, float, float, float, float, float, float, float, float)),
-                                this,
-                                SLOT(slotShowDCM(float, float, float, float, float, float, float, float, float, float, float, float)));
+            SIGNAL(signalRenewDCM(float, float, float, float, float, float, float, float, float)),
+            this,
+            SLOT(slotShowDCM(float, float, float, float, float, float, float, float, float)));
+    connect(m_pCommManager, SIGNAL(signalRenewAngles(float,float,float)), this, SLOT(slotUpdateAngles(float,float,float)));
     connect(m_pButtonSendStart, SIGNAL(clicked()), this, SLOT(slotSendStart()));
     connect(m_pCommManager, SIGNAL(signalRenewTimeGap(unsigned long long)), this, SLOT(slotUpdateTimeGap(unsigned long long)));
 
@@ -136,30 +137,28 @@ void ClientView::slotSendStart()
 
 void ClientView::slotShowDCM(float fIi, float fIj, float fIk,
                              float fJi, float fJj, float fJk,
-                             float fKi, float fKj, float fKk,
-                             float fRoll, float fPitch, float fYaw)
+                             float fKi, float fKj, float fKk)
 {
     QString szFirstLine = QString::number(fIi, 'f', 6) + "\t" +
                           QString::number(fIj, 'f', 6) + "\t" +
-                          QString::number(fIk, 'f', 6) + "\t\t" +
-                          QString::number(fRoll);
+                          QString::number(fIk, 'f', 6) + "\t\t";
     QString szSecondLine = QString::number(fJi, 'f', 6) + "\t" +
                            QString::number(fJj, 'f', 6) + "\t" +
-                           QString::number(fJk, 'f', 6) + "\t\t" +
-                           QString::number(fPitch);
+                           QString::number(fJk, 'f', 6) + "\t\t";
     QString szThirdLine = QString::number(fKi, 'f', 6) + "\t" +
                           QString::number(fKj, 'f', 6) + "\t" +
-                          QString::number(fKk, 'f', 6) + "\t\t" +
-                          QString::number(fYaw);
+                          QString::number(fKk, 'f', 6) + "\t\t";
 
     m_editDCM->setText(szFirstLine);
     m_editDCM->append(szSecondLine);
     m_editDCM->append(szThirdLine);
+}
 
+void ClientView::slotUpdateAngles(float fRoll, float fPitch, float fYaw)
+{
     m_pIndicatorRoll->SetOrientation(fRoll);
     m_pIndicatorPitch->SetOrientation(fPitch);
     m_pIndicatorYaw->SetOrientation(fYaw);
-
 }
 
 void ClientView::slotUpdateTimeGap(unsigned long long nTimeGap)

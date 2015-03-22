@@ -82,6 +82,15 @@ void PacketManager::ProcessDataDescription(unsigned char nHeader)
         //m_pDataKeeper->SetAccY(m_converter.Short);
         //m_pDataKeeper->SetAccZ(m_converter.Short);
         break;
+    case MSNR_DD_SENSFUS_ROLL:
+        m_pDataKeeper->SetRoll(m_converter.RealNum);
+        break;
+    case MSNR_DD_SENSFUS_PITCH:
+        m_pDataKeeper->SetPitch(m_converter.RealNum);
+        break;
+    case MSNR_DD_SENSFUS_YAW:
+        m_pDataKeeper->SetYaw(m_converter.RealNum);
+        break;
     /*case MSNR_DD_DCM11:
         _dataKeeper.setDCM11(_converter.RealNum);
         break;

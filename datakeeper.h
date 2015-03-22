@@ -20,6 +20,10 @@ public:
     void SetAccY(int nAccY);
     void SetAccZ(int nAccZ);
 
+    void SetRoll(float fRoll);
+    void SetPitch(float fPitch);
+    void SetYaw(float fYaw);
+
     void GetAcc(int &nAccX, int &nAccY, int &nAccZ);
     void GetGyro(int &nGyroX, int &nGyroY, int &nGyroZ);
     void GetDCM(vec3 &vec3ITiedCurrent, vec3 &vec3JTiedCurrent, vec3 &vec3KTiedCurrent);
@@ -31,6 +35,7 @@ public:
 
     bool IsAccReady();
     bool IsGyroReady();
+    bool AreAnglesReady();
     inline bool IsDCMReady()
     {
         return m_nRenewStatus & DCM_RENEWED;
@@ -50,7 +55,10 @@ private:
         GYROX_RENEWED = 1 << 3,
         GYROY_RENEWED = 1 << 4,
         GYROZ_RENEWED = 1 << 5,
-        DCM_RENEWED = 1 << 6
+        DCM_RENEWED = 1 << 6,
+        ROLL_RENEWED = 1 << 7,
+        PITCH_RENEWED = 1 << 8,
+        YAW_RENEWED = 1 << 9
     };
     enum FiltrationType {
         FILTRATION_MEDIAN,
@@ -120,12 +128,12 @@ private:
     unsigned long long m_nTimeGap;
 
     //----Constants----
-    const int SIZE_CALIBRATION_SET = 5;
+    const int SIZE_CALIBRATION_SET = 200;
     const int SIZE_AVERAGING_WINDOW = 21;
     const unsigned int POSITION_MEDIAN = 10;
-    const bool DO_FILTER = true;
+    const bool DO_FILTER = false;
     const FiltrationType FILTRATION_TYPE = FILTRATION_MEDIAN;
-    const int UNIT_ACCELERATION = 16384;
+    const int UNIT_ACCELERATION = 8192;
 };
 
 #endif // DATAKEEPER_H

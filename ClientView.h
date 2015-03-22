@@ -26,8 +26,8 @@ public slots:
     void slotUpdateGyroVectors(int nGyroX, int nGyroY, int nGyroZ);
     void slotShowDCM(float fIi, float fIj, float fIk,
                      float fJi, float fJj, float fJk,
-                     float fKi, float fKj, float fKk,
-                     float fRoll, float fPitch, float fYaw);
+                     float fKi, float fKj, float fKk);
+    void slotUpdateAngles(float fRoll, float fPitch, float fYaw);
     void slotUpdateTimeGap(unsigned long long);
 
 private:

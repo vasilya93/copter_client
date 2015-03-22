@@ -16,7 +16,7 @@ public:
 
     inline int Connect()
     {
-        return m_pSerialComm->Connect(PORT_NAME, SerialComm::BAUDRATE_57600);
+        return m_pSerialComm->Connect(PORT_NAME, SerialComm::BAUDRATE_115200);
     }
     inline void SendStart()
     {
@@ -28,8 +28,8 @@ signals:
     void signalRenewGyro(int, int, int);
     void signalRenewDCM(float fIi, float fIj, float fIk,
                         float fJi, float fJj, float fJk,
-                        float fKi, float fKj, float fKk,
-                        float fRoll, float fPitch, float fYaw);
+                        float fKi, float fKj, float fKk);
+    void signalRenewAngles(float fRoll, float fPitch, float fYaw);
     void signalRenewTimeGap(unsigned long long);
 
 protected:

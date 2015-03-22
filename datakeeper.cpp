@@ -157,6 +157,24 @@ void DataKeeper::SetAccZ(int nAccZ)
     TryFusion();
 }
 
+void DataKeeper::SetRoll(float fRoll)
+{
+    m_fRollCurrent = fRoll;
+    m_nRenewStatus |= ROLL_RENEWED;
+}
+
+void DataKeeper::SetPitch(float fPitch)
+{
+    m_fPitchCurrent = fPitch;
+    m_nRenewStatus |= PITCH_RENEWED;
+}
+
+void DataKeeper::SetYaw(float fYaw)
+{
+    m_fYawCurrent = fYaw;
+    m_nRenewStatus |= YAW_RENEWED;
+}
+
 void DataKeeper::GetAcc(int &nAccX, int &nAccY, int &nAccZ)
 {
     nAccX = m_nAccXLast;
@@ -189,6 +207,9 @@ void DataKeeper::GetAngles(float &fRoll, float &fPitch, float &fYaw)
     fRoll = m_fRollCurrent;
     fPitch = m_fPitchCurrent;
     fYaw = m_fYawCurrent;
+    m_nRenewStatus &= ~(ROLL_RENEWED |
+                        PITCH_RENEWED |
+                        YAW_RENEWED);
 }
 
 bool DataKeeper::IsAccReady()
@@ -203,6 +224,13 @@ bool DataKeeper::IsGyroReady()
     return ((m_nRenewStatus & GYROX_RENEWED) &&
             (m_nRenewStatus & GYROY_RENEWED) &&
             (m_nRenewStatus & GYROZ_RENEWED));
+}
+
+bool DataKeeper::AreAnglesReady()
+{
+    return ((m_nRenewStatus & ROLL_RENEWED) &&
+            (m_nRenewStatus & PITCH_RENEWED) &&
+            (m_nRenewStatus & YAW_RENEWED));
 }
 
 int DataKeeper::FilterValue(int nCurrentValue, CFifo<int> *fifoFiltrationWindow)
@@ -296,6 +324,7 @@ void DataKeeper::TryFusion()
     m_vec3KTiedPrevious = m_vec3KTiedCurrent;
 
     m_nRenewStatus |= DCM_RENEWED;
+    m_nRenewStatus |= ROLL_RENEWED | PITCH_RENEWED | YAW_RENEWED;
 }
 
 int compare(const void * a, const void * b)
