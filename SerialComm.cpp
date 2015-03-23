@@ -15,12 +15,12 @@ using namespace std;
 
 SerialComm::SerialComm() :
     _packetCounter(0),
-    HandlersNum(0),
+    nPortHandle(-1),
     _firstTick(0),
     _lastTick(0),
     _isReadingContinued(false),
     ReadBufSize(READ_BUF_SIZE + 1),
-    nPortHandle(-1)
+    HandlersNum(0)
 {
     ReadBuf = new unsigned char[ReadBufSize];
 }
@@ -110,8 +110,8 @@ int SerialComm::Connect(const char* port, int baudrate)
     tty.c_cflag     |=  CS8;
 
     tty.c_cflag     &=  ~CRTSCTS;       // no flow control
-    tty.c_cc[VMIN]      =   5;                  // read doesn't block
-    tty.c_cc[VTIME]     =   1;                  // 0.1 seconds read timeout
+    tty.c_cc[VMIN]      =   0;                  // read doesn't block
+    tty.c_cc[VTIME]     =   0;                  // 0.1 seconds read timeout
     tty.c_cflag     |=  CREAD | CLOCAL;     // turn on READ & ignore ctrl lines
 
     /* Make raw */
@@ -171,8 +171,6 @@ int SerialComm::Write(char* line, unsigned long lineSize)
 void SerialComm::_readThread()
 {
     int nBytesRead;
-    bool nIsSuccess;
-    unsigned long error;
     _readMutex.lock();
     while(_isReadingContinued)
     {

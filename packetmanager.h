@@ -124,8 +124,8 @@ private:
     CFifo<unsigned char> m_fifoInput;
     Converter m_converter;
 
-    unsigned int SIZE_PACKET = 5;
-    unsigned int SIZE_BUFFER = 1024;
+    unsigned int SIZE_PACKET = 3;
+    unsigned int SIZE_BUFFER = 2048;
     unsigned int MSNR_DD_MASK = 0xFC;
 };
 

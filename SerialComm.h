@@ -10,7 +10,7 @@
 #define COMM_EM_THRCRFL 6
 #define COMM_EM_TTHRCRFL 7
 
-#define READ_BUF_SIZE 200
+#define READ_BUF_SIZE 1024
 #define MAX_HANDLERS_NUMBER 5
 
 #include "thread"

@@ -29,21 +29,21 @@ void PacketManager::ParsePacket(const unsigned char* pPacket)
     case MSNR_MT_BYTE:
         break;
     case MSNR_MT_WORD:
-        m_converter.Bytes[0] = pPacket[4];
-        m_converter.Bytes[1] = pPacket[3];
+        m_converter.Bytes[0] = pPacket[2];
+        m_converter.Bytes[1] = pPacket[1];
         m_converter.Bytes[2] = 0;
         m_converter.Bytes[3] = 0;
         ProcessDataDescription(pPacket[0]);
         break;
     case MSNR_MT_DWRD:
-        m_converter.Bytes[0] = pPacket[4];
-        m_converter.Bytes[1] = pPacket[3];
+        m_converter.Bytes[0] = pPacket[2/*4*/];
+        m_converter.Bytes[1] = pPacket[1/*3*/];
         m_converter.Bytes[2] = pPacket[2];
         m_converter.Bytes[3] = pPacket[1];
         ProcessDataDescription(pPacket[0]);
         break;
     default:
-        //printf("ProcessPackageType: error, unknown package type %u!\n", message[0] & ~MSNR_DD_MASK);
+        qDebug("ProcessPackageType: error, unknown package type!\n");
         break;
     }
 }
@@ -164,6 +164,7 @@ void PacketManager::ProcessDataDescription(unsigned char nHeader)
         /*printf("ProcessDataDescription: error, unknown data description: %u\n",
                messageHeader & MSNR_DD_MASK);
         printf("ProcessDataDescription: data: %u\n", _converter.Integer);*/
+        qDebug("ProcessDataDescription: error, unknown data description!\n");
         break;
     }
 }
