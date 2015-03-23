@@ -21,34 +21,27 @@ CommManager::~CommManager()
     delete m_pDataKeeper;
 }
 
+void CommManager::GetAccUnread(QVector<double> &vecAccX, QVector<double> &vecAccY, QVector<double> &vecAccZ)
+{
+    vecAccX = QVector<double>::fromStdVector(m_pDataKeeper->GetAccXUnread());
+    m_pDataKeeper->ClearAccXUnread();
+    vecAccY = QVector<double>::fromStdVector(m_pDataKeeper->GetAccYUnread());
+    m_pDataKeeper->ClearAccYUnread();
+    vecAccZ = QVector<double>::fromStdVector(m_pDataKeeper->GetAccZUnread());
+    m_pDataKeeper->ClearAccZUnread();
+}
+
+void CommManager::GetGyroUnread(QVector<double> &vecGyroX, QVector<double> &vecGyroY, QVector<double> &vecGyroZ)
+{
+    vecGyroX = QVector<double>::fromStdVector(m_pDataKeeper->GetGyroXUnread());
+    m_pDataKeeper->ClearGyroXUnread();
+    vecGyroY = QVector<double>::fromStdVector(m_pDataKeeper->GetGyroYUnread());
+    m_pDataKeeper->ClearGyroYUnread();
+    vecGyroZ = QVector<double>::fromStdVector(m_pDataKeeper->GetGyroZUnread());
+    m_pDataKeeper->ClearGyroZUnread();
+}
+
 void CommManager::SerialBytesReceivedHandler(unsigned char *pBytesReceived, unsigned int nSize)
 {
     m_pPacketManager->PushReceived(pBytesReceived, nSize);
-
-    if (m_pDataKeeper->IsAccReady()) {
-        int nAccX, nAccY, nAccZ;
-        m_pDataKeeper->GetAcc(nAccX, nAccY, nAccZ);
-        emit signalRenewAccel(nAccX, nAccY, nAccZ);
-    }
-
-    if (m_pDataKeeper->IsGyroReady()) {
-        int nGyroX, nGyroY, nGyroZ;
-        m_pDataKeeper->GetGyro(nGyroX, nGyroY, nGyroZ);
-        emit signalRenewGyro(nGyroX, nGyroY, nGyroZ);
-    }
-
-    if (m_pDataKeeper->IsDCMReady()) {
-        vec3 vec3ITiedCurrent, vec3JTiedCurrent, vec3KTiedCurrent;
-        m_pDataKeeper->GetDCM(vec3ITiedCurrent, vec3JTiedCurrent, vec3KTiedCurrent);
-        emit signalRenewDCM(vec3ITiedCurrent.x, vec3ITiedCurrent.y, vec3ITiedCurrent.z,
-                            vec3JTiedCurrent.x, vec3JTiedCurrent.y, vec3JTiedCurrent.z,
-                            vec3KTiedCurrent.x, vec3KTiedCurrent.y, vec3KTiedCurrent.z);
-        emit signalRenewTimeGap(m_pDataKeeper->GetTimeGap());
-    }
-
-    if (m_pDataKeeper->AreAnglesReady()) {
-        float fRoll, fPitch, fYaw;
-        m_pDataKeeper->GetAngles(fRoll, fPitch, fYaw);
-        emit signalRenewAngles(fRoll, fPitch, fYaw);
-    }
 }

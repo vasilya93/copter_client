@@ -5,8 +5,12 @@
 
 ClientView::ClientView(QWidget *parent)
     : QWidget(parent),
-      m_fCurrentX(0),
-      m_fCurrentXGyro(0),
+      m_fCurrentXAccX(0),
+      m_fCurrentXAccY(0),
+      m_fCurrentXAccZ(0),
+      m_fCurrentXGyroX(0),
+      m_fCurrentXGyroY(0),
+      m_fCurrentXGyroZ(0),
       m_bDoAllowEdit(true)
 {
     m_plotAcc = new QCustomPlot;
@@ -14,16 +18,19 @@ ClientView::ClientView(QWidget *parent)
     m_pTimerRedraw = new QTimer;
     m_pCommManager = new CommManager;
 
-    m_vecX.append(m_fCurrentX);
-    m_vecXGyro.append(m_fCurrentXGyro);
+    m_vecXAccX.append(0);
+    m_vecXAccY.append(0);
+    m_vecXAccZ.append(0);
+    m_vecXGyroX.append(0);
+    m_vecXGyroY.append(0);
+    m_vecXGyroZ.append(0);
+
     m_vecAccX.append(0);
     m_vecAccY.append(0);
     m_vecAccZ.append(0);
     m_vecGyroX.append(0);
     m_vecGyroY.append(0);
     m_vecGyroZ.append(0);
-    m_fCurrentX++;
-    m_fCurrentXGyro++;
 
     m_plotAcc->legend->setVisible(true);
     QFont legendFont = font();  // start out with MainWindow's font..
@@ -35,15 +42,15 @@ ClientView::ClientView(QWidget *parent)
     m_plotAcc->addGraph();
     m_plotAcc->graph(0)->setPen(QPen(QColor(Qt::blue)));
     m_plotAcc->graph(0)->setName("Acceleration X");
-    m_plotAcc->graph(0)->setData(m_vecX, m_vecAccX);
+    m_plotAcc->graph(0)->setData(m_vecXAccX, m_vecAccX);
     m_plotAcc->addGraph();
     m_plotAcc->graph(1)->setPen(QPen(QColor(Qt::red)));
     m_plotAcc->graph(1)->setName("Acceleration Y");
-    m_plotAcc->graph(1)->setData(m_vecX, m_vecAccY);
+    m_plotAcc->graph(1)->setData(m_vecXAccY, m_vecAccY);
     m_plotAcc->addGraph();
     m_plotAcc->graph(2)->setPen(QPen(QColor(Qt::green)));
     m_plotAcc->graph(2)->setName("Acceleration Z");
-    m_plotAcc->graph(2)->setData(m_vecX, m_vecAccZ);
+    m_plotAcc->graph(2)->setData(m_vecXAccZ, m_vecAccZ);
     m_plotAcc->xAxis->setLabel("time");
     m_plotAcc->yAxis->setLabel("magnitude");
 
@@ -58,15 +65,15 @@ ClientView::ClientView(QWidget *parent)
     m_plotGyro->addGraph();
     m_plotGyro->graph(0)->setPen(QPen(QColor(Qt::blue)));
     m_plotGyro->graph(0)->setName("Angular speed X");
-    m_plotGyro->graph(0)->setData(m_vecXGyro, m_vecGyroX);
+    m_plotGyro->graph(0)->setData(m_vecXGyroX, m_vecGyroX);
     m_plotGyro->addGraph();
     m_plotGyro->graph(1)->setPen(QPen(QColor(Qt::red)));
     m_plotGyro->graph(1)->setName("Angular speed Y");
-    m_plotGyro->graph(1)->setData(m_vecXGyro, m_vecGyroY);
+    m_plotGyro->graph(1)->setData(m_vecXGyroY, m_vecGyroY);
     m_plotGyro->addGraph();
     m_plotGyro->graph(2)->setPen(QPen(QColor(Qt::green)));
     m_plotGyro->graph(2)->setName("Angular speed Z");
-    m_plotGyro->graph(2)->setData(m_vecXGyro, m_vecGyroZ);
+    m_plotGyro->graph(2)->setData(m_vecXGyroZ, m_vecGyroZ);
     m_plotGyro->xAxis->setLabel("time");
     m_plotGyro->yAxis->setLabel("magnitude");
 
@@ -105,19 +112,11 @@ ClientView::ClientView(QWidget *parent)
 
 
     connect(m_pTimerRedraw, SIGNAL(timeout()), this, SLOT(slotUpdateGraphView()));
-    connect(m_pCommManager, SIGNAL(signalRenewAccel(int,int,int)), this, SLOT(slotUpdateAccVectors(int,int,int)));
-    connect(m_pCommManager, SIGNAL(signalRenewGyro(int,int,int)), this, SLOT(slotUpdateGyroVectors(int,int,int)));
-    connect(m_pCommManager,
-            SIGNAL(signalRenewDCM(float, float, float, float, float, float, float, float, float)),
-            this,
-            SLOT(slotShowDCM(float, float, float, float, float, float, float, float, float)));
-    connect(m_pCommManager, SIGNAL(signalRenewAngles(float,float,float)), this, SLOT(slotUpdateAngles(float,float,float)));
     connect(m_pButtonSendStart, SIGNAL(clicked()), this, SLOT(slotSendStart()));
-    connect(m_pCommManager, SIGNAL(signalRenewTimeGap(unsigned long long)), this, SLOT(slotUpdateTimeGap(unsigned long long)));
 
     m_pCommManager->Connect();
 
-    m_pTimerRedraw->start(62);
+    m_pTimerRedraw->start(50/*62*/);
 }
 
 ClientView::~ClientView()
@@ -135,78 +134,154 @@ void ClientView::slotSendStart()
     m_pCommManager->SendStart();
 }
 
-void ClientView::slotShowDCM(float fIi, float fIj, float fIk,
-                             float fJi, float fJj, float fJk,
-                             float fKi, float fKj, float fKk)
-{
-    QString szFirstLine = QString::number(fIi, 'f', 6) + "\t" +
-                          QString::number(fIj, 'f', 6) + "\t" +
-                          QString::number(fIk, 'f', 6) + "\t\t";
-    QString szSecondLine = QString::number(fJi, 'f', 6) + "\t" +
-                           QString::number(fJj, 'f', 6) + "\t" +
-                           QString::number(fJk, 'f', 6) + "\t\t";
-    QString szThirdLine = QString::number(fKi, 'f', 6) + "\t" +
-                          QString::number(fKj, 'f', 6) + "\t" +
-                          QString::number(fKk, 'f', 6) + "\t\t";
-
-    m_editDCM->setText(szFirstLine);
-    m_editDCM->append(szSecondLine);
-    m_editDCM->append(szThirdLine);
-}
-
-void ClientView::slotUpdateAngles(float fRoll, float fPitch, float fYaw)
-{
-    m_pIndicatorRoll->SetOrientation(fRoll);
-    m_pIndicatorPitch->SetOrientation(fPitch);
-    m_pIndicatorYaw->SetOrientation(fYaw);
-}
-
-void ClientView::slotUpdateTimeGap(unsigned long long nTimeGap)
-{
-    m_pLabelTimeGap->setText("Time gap is " + QString::number(nTimeGap/1000) + "\tusec");
-}
-
 void ClientView::slotUpdateGraphView()
 {
-    m_plotAcc->graph(0)->setData(m_vecX, m_vecAccX);
-    m_plotAcc->graph(1)->setData(m_vecX, m_vecAccY);
-    m_plotAcc->graph(2)->setData(m_vecX, m_vecAccZ);
+    QVector<double> vecAccX, vecAccY, vecAccZ,
+                    vecGyroX, vecGyroY, vecGyroZ;
+
+    m_pCommManager->GetAccUnread(vecAccX, vecAccY, vecAccZ);
+    m_pCommManager->GetGyroUnread(vecGyroX, vecGyroY, vecGyroZ);
+
+    AddValuesToAccVector(vecAccX, vecAccY, vecAccZ);
+    AddValuesToGyroVector(vecGyroX, vecGyroY, vecGyroZ);
+
+    m_plotAcc->graph(0)->setData(m_vecXAccX, m_vecAccX);
+    m_plotAcc->graph(1)->setData(m_vecXAccY, m_vecAccY);
+    m_plotAcc->graph(2)->setData(m_vecXAccZ, m_vecAccZ);
     m_plotAcc->replot();
     m_plotAcc->rescaleAxes();
 
-    m_plotGyro->graph(0)->setData(m_vecXGyro, m_vecGyroX);
-    m_plotGyro->graph(1)->setData(m_vecXGyro, m_vecGyroY);
-    m_plotGyro->graph(2)->setData(m_vecXGyro, m_vecGyroZ);
+    m_plotGyro->graph(0)->setData(m_vecXGyroX, m_vecGyroX);
+    m_plotGyro->graph(1)->setData(m_vecXGyroY, m_vecGyroY);
+    m_plotGyro->graph(2)->setData(m_vecXGyroZ, m_vecGyroZ);
     m_plotGyro->replot();
     m_plotGyro->rescaleAxes();
 }
 
-void ClientView::slotUpdateAccVectors(int nAccX, int nAccY, int nAccZ)
+void ClientView::AddValuesToAccVector(int nAccX, int nAccY, int nAccZ)
 {
-    m_vecX.append(m_fCurrentX);
-    m_vecAccX.append(nAccX);
-    m_vecAccY.append(nAccY);
-    m_vecAccZ.append(nAccZ);
-    if (m_vecX.size() > 500) {
-        m_vecX.pop_front();
-        m_vecAccX.pop_front();
-        m_vecAccY.pop_front();
-        m_vecAccZ.pop_front();
-    }
-    m_fCurrentX++;
+        m_vecXAccX.append(m_fCurrentXAccX);
+        m_vecXAccY.append(m_fCurrentXAccY);
+        m_vecXAccZ.append(m_fCurrentXAccZ);
+        m_vecAccX.append(nAccX);
+        m_vecAccY.append(nAccY);
+        m_vecAccZ.append(nAccZ);
+        if (m_vecXAccX.size() > SIZE_SET) {
+            m_vecXAccX.pop_front();
+            m_vecAccX.pop_front();
+        }
+
+        if (m_vecXAccY.size() > SIZE_SET) {
+            m_vecXAccY.pop_front();
+            m_vecAccY.pop_front();
+        }
+
+        if (m_vecXAccZ.size() > SIZE_SET) {
+            m_vecXAccZ.pop_front();
+            m_vecAccZ.pop_front();
+        }
+
+        m_fCurrentXAccX++;
+        m_fCurrentXAccY++;
+        m_fCurrentXAccZ++;
 }
 
-void ClientView::slotUpdateGyroVectors(int nGyroX, int nGyroY, int nGyroZ)
+void ClientView::AddValuesToGyroVector(int nGyroX, int nGyroY, int nGyroZ)
 {
-    m_vecXGyro.append(m_fCurrentXGyro);
-    m_vecGyroX.append(nGyroX);
-    m_vecGyroY.append(nGyroY);
-    m_vecGyroZ.append(nGyroZ);
-    if (m_vecXGyro.size() > 500) {
-        m_vecXGyro.pop_front();
-        m_vecGyroX.pop_front();
-        m_vecGyroY.pop_front();
-        m_vecGyroZ.pop_front();
+        m_vecXGyroX.append(m_fCurrentXGyroX);
+        m_vecXGyroY.append(m_fCurrentXGyroY);
+        m_vecXGyroZ.append(m_fCurrentXGyroZ);
+        m_vecGyroX.append(nGyroX);
+        m_vecGyroY.append(nGyroY);
+        m_vecGyroZ.append(nGyroZ);
+
+        if (m_vecXGyroX.size() > SIZE_SET) {
+            m_vecXGyroX.pop_front();
+            m_vecGyroX.pop_front();
+        }
+
+        if (m_vecXGyroY.size() > SIZE_SET) {
+            m_vecXGyroY.pop_front();
+            m_vecGyroY.pop_front();
+        }
+
+        if (m_vecXGyroZ.size() > SIZE_SET) {
+            m_vecXGyroZ.pop_front();
+            m_vecGyroZ.pop_front();
+        }
+        m_fCurrentXGyroX++;
+        m_fCurrentXGyroY++;
+        m_fCurrentXGyroZ++;
+}
+
+void ClientView::AddValuesToAccVector(QVector<double> vecAccX,
+                                      QVector<double> vecAccY,
+                                      QVector<double> vecAccZ)
+{
+    m_vecAccX += vecAccX;
+    m_vecAccY += vecAccY;
+    m_vecAccZ += vecAccZ;
+
+    while (m_fCurrentXAccX++ < m_vecAccX.size()) {
+        m_vecXAccX.append(m_fCurrentXAccX);
     }
-    m_fCurrentXGyro++;
+
+    while (m_fCurrentXAccY++ < m_vecAccY.size()) {
+        m_vecXAccY.append(m_fCurrentXAccY);
+    }
+
+    while (m_fCurrentXAccZ++ < m_vecAccZ.size()) {
+        m_vecXAccZ.append(m_fCurrentXAccZ);
+    }
+
+//    if (m_vecXAccX.size() > SIZE_SET) {
+//        m_vecXAccX.erase(m_vecXAccX.begin(), m_vecXAccX.begin() + (m_vecXAccX.size() - SIZE_SET));
+//        m_vecAccX.erase(m_vecAccX.begin(), m_vecAccX.begin() + (m_vecAccX.size() - SIZE_SET));
+//    }
+
+//    if (m_vecXAccY.size() > SIZE_SET) {
+//        m_vecXAccY.erase(m_vecXAccY.begin(), m_vecXAccY.begin() + (m_vecXAccY.size() - SIZE_SET));
+//        m_vecAccY.erase(m_vecAccY.begin(), m_vecAccY.begin() + (m_vecAccY.size() - SIZE_SET));
+//    }
+
+//    if (m_vecXAccZ.size() > SIZE_SET) {
+//        m_vecXAccZ.erase(m_vecXAccZ.begin(), m_vecXAccZ.begin() + (m_vecXAccZ.size() - SIZE_SET));
+//        m_vecAccZ.erase(m_vecAccZ.begin(), m_vecAccZ.begin() + (m_vecAccZ.size() - SIZE_SET));
+//    }
+}
+
+void ClientView::AddValuesToGyroVector(QVector<double> vecGyroX,
+                                       QVector<double> vecGyroY,
+                                       QVector<double> vecGyroZ)
+{
+    m_vecGyroX += vecGyroX;
+    m_vecGyroY += vecGyroY;
+    m_vecGyroZ += vecGyroZ;
+
+    while (m_fCurrentXGyroX++ < m_vecGyroX.size()) {
+        m_vecXGyroX.append(m_fCurrentXGyroX);
+    }
+
+    while (m_fCurrentXGyroY++ < m_vecGyroY.size()) {
+        m_vecXGyroY.append(m_fCurrentXGyroY);
+    }
+
+    while (m_fCurrentXGyroZ++ < m_vecGyroZ.size()) {
+        m_vecXGyroZ.append(m_fCurrentXGyroZ);
+    }
+
+//    if (m_vecXGyroX.size() > SIZE_SET) {
+//        m_vecXGyroX.erase(m_vecXGyroX.begin(), m_vecXGyroX.begin() + (m_vecXGyroX.size() - SIZE_SET));
+//        m_vecGyroX.erase(m_vecGyroX.begin(), m_vecGyroX.begin() + (m_vecGyroX.size() - SIZE_SET));
+//    }
+
+//    if (m_vecXGyroY.size() > SIZE_SET) {
+//        m_vecXGyroY.erase(m_vecXGyroY.begin(), m_vecXGyroY.begin() + (m_vecXGyroY.size() - SIZE_SET));
+//        m_vecGyroY.erase(m_vecGyroY.begin(), m_vecGyroY.begin() + (m_vecGyroY.size() - SIZE_SET));
+//    }
+
+//    if (m_vecXGyroZ.size() > SIZE_SET) {
+//        m_vecXGyroZ.erase(m_vecXGyroZ.begin(), m_vecXGyroZ.begin() + (m_vecXGyroZ.size() - SIZE_SET));
+//        m_vecGyroZ.erase(m_vecGyroZ.begin(), m_vecGyroZ.begin() + (m_vecGyroZ.size() - SIZE_SET));
+//    }
 }

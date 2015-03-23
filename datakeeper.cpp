@@ -70,9 +70,10 @@ void DataKeeper::SetGyroX(int nGyroX)
     int nAlignedGyroX = nGyroX + m_nGyroXOffset;
     m_nGyroXLast = FilterValue(nAlignedGyroX, &m_fifoGyroXFiltration);
     m_vecGyroX.push_back(m_nGyroXLast);
+    m_vecGyroXUnread.push_back((double)m_nGyroXLast);
     m_nRenewStatus |= GYROX_RENEWED;
     
-    TryFusion();
+    //TryFusion();
 }
 
 void DataKeeper::SetGyroY(int nGyroY)
@@ -87,9 +88,10 @@ void DataKeeper::SetGyroY(int nGyroY)
     int nAlignedGyroY = nGyroY + m_nGyroYOffset;
     m_nGyroYLast = FilterValue(nAlignedGyroY, &m_fifoGyroYFiltration);
     m_vecGyroY.push_back(m_nGyroYLast);
+    m_vecGyroYUnread.push_back((double)m_nGyroYLast);
     m_nRenewStatus |= GYROY_RENEWED;
     
-    TryFusion();
+    //TryFusion();
 }
 
 void DataKeeper::SetGyroZ(int nGyroZ)
@@ -104,9 +106,10 @@ void DataKeeper::SetGyroZ(int nGyroZ)
     int nAlignedGyroZ = nGyroZ + m_nGyroZOffset;
     m_nGyroZLast = FilterValue(nAlignedGyroZ, &m_fifoGyroZFiltration);
     m_vecGyroZ.push_back(m_nGyroZLast);
+    m_vecGyroZUnread.push_back((double)m_nGyroZLast);
     m_nRenewStatus |= GYROZ_RENEWED;
     
-    TryFusion();
+    //TryFusion();
 }
 
 void DataKeeper::SetAccX(int nAccX)
@@ -121,8 +124,9 @@ void DataKeeper::SetAccX(int nAccX)
     int nAlignedAccX = nAccX + m_nAccXOffset;
     m_nAccXLast = FilterValue(nAlignedAccX, &m_fifoAccXFiltration);
     m_vecAccX.push_back(m_nAccXLast);
+    m_vecAccXUnread.push_back((double)m_nAccXLast);
     m_nRenewStatus |= ACCX_RENEWED;
-    TryFusion();
+    //TryFusion();
 }
 
 void DataKeeper::SetAccY(int nAccY)
@@ -137,8 +141,9 @@ void DataKeeper::SetAccY(int nAccY)
     int nAlignedAccY = nAccY + m_nAccYOffset;
     m_nAccYLast = FilterValue(nAlignedAccY, &m_fifoAccYFiltration);
     m_vecAccY.push_back(m_nAccYLast);
+    m_vecAccYUnread.push_back((double)m_nAccYLast);
     m_nRenewStatus |= ACCY_RENEWED;
-    TryFusion();
+    //TryFusion();
 }
 
 void DataKeeper::SetAccZ(int nAccZ)
@@ -153,8 +158,9 @@ void DataKeeper::SetAccZ(int nAccZ)
     int nAlignedAccZ = nAccZ + m_nAccZOffset;
     m_nAccZLast = FilterValue(nAlignedAccZ, &m_fifoAccZFiltration);
     m_vecAccZ.push_back(m_nAccZLast);
+    m_vecAccZUnread.push_back((double)m_nAccZLast);
     m_nRenewStatus |= ACCZ_RENEWED;
-    TryFusion();
+    //TryFusion();
 }
 
 void DataKeeper::SetRoll(float fRoll)
@@ -175,22 +181,48 @@ void DataKeeper::SetYaw(float fYaw)
     m_nRenewStatus |= YAW_RENEWED;
 }
 
-void DataKeeper::GetAcc(int &nAccX, int &nAccY, int &nAccZ)
+void DataKeeper::GetAcc(int &nAccX, int &nAccY, int &nAccZ) const
 {
     nAccX = m_nAccXLast;
     nAccY = m_nAccYLast;
     nAccZ = m_nAccZLast;
 
-    m_nRenewStatus &= ~(ACCX_RENEWED | ACCY_RENEWED | ACCZ_RENEWED);
+    //m_nRenewStatus &= ~(ACCX_RENEWED | ACCY_RENEWED | ACCZ_RENEWED);
 }
 
-void DataKeeper::GetGyro(int &nGyroX, int &nGyroY, int &nGyroZ)
+void DataKeeper::GetGyro(int &nGyroX, int &nGyroY, int &nGyroZ) const
 {
     nGyroX = m_nGyroXLast;
     nGyroY = m_nGyroYLast;
     nGyroZ = m_nGyroZLast;
 
-    m_nRenewStatus &= ~(GYROX_RENEWED | GYROY_RENEWED | GYROZ_RENEWED);
+    //m_nRenewStatus &= ~(GYROX_RENEWED | GYROY_RENEWED | GYROZ_RENEWED);
+}
+
+void DataKeeper::GetAccVectorUnread(std::vector<double> &vecAccX,
+                                    std::vector<double> &vecAccY,
+                                    std::vector<double> &vecAccZ)
+{
+    vecAccX.insert(vecAccX.end(), m_vecAccXUnread.begin(), m_vecAccXUnread.end());
+    vecAccY.insert(vecAccY.end(), m_vecAccYUnread.begin(), m_vecAccYUnread.end());
+    vecAccZ.insert(vecAccZ.end(), m_vecAccZUnread.begin(), m_vecAccZUnread.end());
+
+    m_vecAccXUnread.clear();
+    m_vecAccYUnread.clear();
+    m_vecAccZUnread.clear();
+}
+
+void DataKeeper::GetGyroVectorUnread(std::vector<double> &vecGyroX,
+                                     std::vector<double> &vecGyroY,
+                                     std::vector<double> &vecGyroZ)
+{
+    vecGyroX.insert(vecGyroX.end(), m_vecGyroXUnread.begin(), m_vecGyroXUnread.end());
+    vecGyroY.insert(vecGyroY.end(), m_vecGyroYUnread.begin(), m_vecGyroYUnread.end());
+    vecGyroZ.insert(vecGyroZ.end(), m_vecGyroZUnread.begin(), m_vecGyroZUnread.end());
+
+    m_vecGyroXUnread.clear();
+    m_vecGyroYUnread.clear();
+    m_vecGyroZUnread.clear();
 }
 
 void DataKeeper::GetDCM(vec3 &vec3ITiedCurrent, vec3 &vec3JTiedCurrent, vec3 &vec3KTiedCurrent)

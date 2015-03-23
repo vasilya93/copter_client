@@ -24,8 +24,66 @@ public:
     void SetPitch(float fPitch);
     void SetYaw(float fYaw);
 
-    void GetAcc(int &nAccX, int &nAccY, int &nAccZ);
-    void GetGyro(int &nGyroX, int &nGyroY, int &nGyroZ);
+    void GetAcc(int &nAccX, int &nAccY, int &nAccZ) const;
+    void GetGyro(int &nGyroX, int &nGyroY, int &nGyroZ) const;
+    void GetAccVectorUnread(std::vector<double> &vecAccX,
+                            std::vector<double> &vecAccY,
+                            std::vector<double> &vecAccZ);
+    void GetGyroVectorUnread(std::vector<double> &vecGyroX,
+                             std::vector<double> &vecGyroY,
+                             std::vector<double> &vecGyroZ);
+
+public:
+    inline void ClearAccXUnread()
+    {
+        m_vecAccXUnread.clear();
+    }
+    inline void ClearAccYUnread()
+    {
+        m_vecAccYUnread.clear();
+    }
+    inline void ClearAccZUnread()
+    {
+        m_vecAccZUnread.clear();
+    }
+    inline void ClearGyroXUnread()
+    {
+        m_vecGyroXUnread.clear();
+    }
+    inline void ClearGyroYUnread()
+    {
+        m_vecGyroYUnread.clear();
+    }
+    inline void ClearGyroZUnread()
+    {
+        m_vecGyroZUnread.clear();
+    }
+public:
+    inline const std::vector<double> &GetAccXUnread()
+    {
+        return m_vecAccXUnread;
+    }
+    inline const std::vector<double> &GetAccYUnread()
+    {
+        return m_vecAccYUnread;
+    }
+    inline const std::vector<double> &GetAccZUnread()
+    {
+        return m_vecAccZUnread;
+    }
+    inline const std::vector<double> &GetGyroXUnread()
+    {
+        return m_vecGyroXUnread;
+    }
+    inline const std::vector<double> &GetGyroYUnread()
+    {
+        return m_vecGyroYUnread;
+    }
+    inline const std::vector<double> &GetGyroZUnread()
+    {
+        return m_vecGyroZUnread;
+    }
+
     void GetDCM(vec3 &vec3ITiedCurrent, vec3 &vec3JTiedCurrent, vec3 &vec3KTiedCurrent);
     void GetAngles(float &fRoll, float &fPitch, float &fYaw);
     inline unsigned long long GetTimeGap()
@@ -72,6 +130,14 @@ private:
                      m_vecGyroX,
                      m_vecGyroY,
                      m_vecGyroZ;
+
+    std::vector<double> m_vecAccXUnread,
+                        m_vecAccYUnread,
+                        m_vecAccZUnread,
+                        m_vecGyroXUnread,
+                        m_vecGyroYUnread,
+                        m_vecGyroZUnread;
+
     int m_nAccXLast,
         m_nAccYLast,
         m_nAccZLast,
@@ -128,7 +194,7 @@ private:
     unsigned long long m_nTimeGap;
 
     //----Constants----
-    const int SIZE_CALIBRATION_SET = 200;
+    const int SIZE_CALIBRATION_SET = 0;
     const int SIZE_AVERAGING_WINDOW = 21;
     const unsigned int POSITION_MEDIAN = 10;
     const bool DO_FILTER = false;

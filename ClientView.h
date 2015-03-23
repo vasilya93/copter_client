@@ -22,13 +22,16 @@ public:
 public slots:
     void slotSendStart();
     void slotUpdateGraphView();
-    void slotUpdateAccVectors(int nAccX, int nAccY, int nAccZ);
-    void slotUpdateGyroVectors(int nGyroX, int nGyroY, int nGyroZ);
-    void slotShowDCM(float fIi, float fIj, float fIk,
-                     float fJi, float fJj, float fJk,
-                     float fKi, float fKj, float fKk);
-    void slotUpdateAngles(float fRoll, float fPitch, float fYaw);
-    void slotUpdateTimeGap(unsigned long long);
+
+private:
+    void AddValuesToAccVector(int nAccX, int nAccY, int nAccZ);
+    void AddValuesToGyroVector(int nGyroX, int nGyroY, int nGyroZ);
+    void AddValuesToAccVector(QVector<double> vecAccX,
+                              QVector<double> vecAccY,
+                              QVector<double> vecAccZ);
+    void AddValuesToGyroVector(QVector<double> vecGyroX,
+                               QVector<double> vecGyroY,
+                               QVector<double> vecGyroZ);
 
 private:
     QLabel *m_pLabelTimeGap;
@@ -40,19 +43,32 @@ private:
                          *m_pIndicatorPitch,
                          *m_pIndicatorYaw;
     QTimer *m_pTimerRedraw;
-    QVector<double> m_vecX;
-    QVector<double> m_vecXGyro;
+
+    QVector<double> m_vecXAccX;
+    QVector<double> m_vecXAccY;
+    QVector<double> m_vecXAccZ;
+
+    QVector<double> m_vecXGyroX;
+    QVector<double> m_vecXGyroY;
+    QVector<double> m_vecXGyroZ;
+
     QVector<double> m_vecAccX;
     QVector<double> m_vecAccY;
     QVector<double> m_vecAccZ;
     QVector<double> m_vecGyroX;
     QVector<double> m_vecGyroY;
     QVector<double> m_vecGyroZ;
-    double m_fCurrentX,
-           m_fCurrentXGyro;
+    double m_fCurrentXAccX,
+           m_fCurrentXAccY,
+           m_fCurrentXAccZ,
+           m_fCurrentXGyroX,
+           m_fCurrentXGyroY,
+           m_fCurrentXGyroZ;
     CommManager *m_pCommManager;
 
     bool m_bDoAllowEdit;
+
+    const int SIZE_SET = 500;
 };
 
 #endif // CLIENTVIEW_H

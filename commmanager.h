@@ -2,6 +2,7 @@
 #define COMMMANAGER_H
 
 #include <QObject>
+#include <QVector>
 #include "SerialComm.h"
 #include "packetmanager.h"
 #include "datakeeper.h"
@@ -22,21 +23,18 @@ public:
     {
         m_pSerialComm->Write("start", 5);
     }
+    inline DataKeeper &GetDataKeeper()
+    {
+        return *m_pDataKeeper;
+    }
 
-signals:
-    void signalRenewAccel(int, int, int);
-    void signalRenewGyro(int, int, int);
-    void signalRenewDCM(float fIi, float fIj, float fIk,
-                        float fJi, float fJj, float fJk,
-                        float fKi, float fKj, float fKk);
-    void signalRenewAngles(float fRoll, float fPitch, float fYaw);
-    void signalRenewTimeGap(unsigned long long);
+public:
+    void GetAccUnread(QVector<double> &vecAccX, QVector<double> &vecAccY, QVector<double> &vecAccZ);
+    void GetGyroUnread(QVector<double> &vecGyroX, QVector<double> &vecGyroY, QVector<double> &vecGyroZ);
 
 protected:
     virtual void SerialBytesReceivedHandler(unsigned char*, unsigned int);
     virtual void SerialNothingReceivedHandler(){}
-
-public slots:
 
 private:
     SerialComm *m_pSerialComm;
