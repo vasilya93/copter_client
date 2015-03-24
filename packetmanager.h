@@ -115,6 +115,10 @@ public:
     {
         m_pDataKeeper = pDataKeeper;
     }
+    inline void ClearInput()
+    {
+        m_fifoInput.Reset();
+    }
 
 private:
     void ParsePacket(const unsigned char* pPacket);

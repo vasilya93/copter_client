@@ -235,6 +235,12 @@ void DataKeeper::GetGyroVectorUnread(std::vector<double> &vecGyroX,
     m_vecGyroZUnread.clear();
 }
 
+void DataKeeper::ClearData()
+{
+    m_nRenewStatus = 0;
+    m_nExposeStatus = 0;
+}
+
 void DataKeeper::GetDCM(vec3 &vec3ITiedCurrent, vec3 &vec3JTiedCurrent, vec3 &vec3KTiedCurrent)
 {
     vec3ITiedCurrent = m_vec3ITiedCurrent;

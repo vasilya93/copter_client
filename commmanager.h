@@ -32,6 +32,8 @@ public:
     void GetAccUnread(QVector<double> &vecAccX, QVector<double> &vecAccY, QVector<double> &vecAccZ);
     void GetGyroUnread(QVector<double> &vecGyroX, QVector<double> &vecGyroY, QVector<double> &vecGyroZ);
 
+    void StartConnection();
+
 protected:
     virtual void SerialBytesReceivedHandler(unsigned char*, unsigned int);
     virtual void SerialNothingReceivedHandler(){}

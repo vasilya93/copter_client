@@ -83,6 +83,8 @@ public:
     {
         return m_vecGyroZUnread;
     }
+public:
+    void ClearData();
 
     void GetDCM(vec3 &vec3ITiedCurrent, vec3 &vec3JTiedCurrent, vec3 &vec3KTiedCurrent);
     void GetAngles(float &fRoll, float &fPitch, float &fYaw);

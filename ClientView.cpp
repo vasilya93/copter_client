@@ -121,7 +121,7 @@ ClientView::~ClientView()
 
 void ClientView::slotSendStart()
 {
-    m_pCommManager->SendStart();
+    m_pCommManager->StartConnection();
 }
 
 void ClientView::slotUpdateGraphView()

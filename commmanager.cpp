@@ -41,6 +41,14 @@ void CommManager::GetGyroUnread(QVector<double> &vecGyroX, QVector<double> &vecG
     m_pDataKeeper->ClearGyroZUnread();
 }
 
+void CommManager::StartConnection()
+{
+    m_pPacketManager->ClearInput();
+    m_pDataKeeper->ClearData();
+
+    m_pSerialComm->Write("start", 5);
+}
+
 void CommManager::SerialBytesReceivedHandler(unsigned char *pBytesReceived, unsigned int nSize)
 {
     m_pPacketManager->PushReceived(pBytesReceived, nSize);
