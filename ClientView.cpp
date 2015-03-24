@@ -5,12 +5,7 @@
 
 ClientView::ClientView(QWidget *parent)
     : QWidget(parent),
-      m_fCurrentXAccX(0),
-      m_fCurrentXAccY(0),
-      m_fCurrentXAccZ(0),
-      m_fCurrentXGyroX(0),
-      m_fCurrentXGyroY(0),
-      m_fCurrentXGyroZ(0),
+      m_fCurrentX(0),
       m_bDoAllowEdit(true)
 {
     m_plotAcc = new QCustomPlot;
@@ -18,12 +13,7 @@ ClientView::ClientView(QWidget *parent)
     m_pTimerRedraw = new QTimer;
     m_pCommManager = new CommManager;
 
-    m_vecXAccX.append(0);
-    m_vecXAccY.append(0);
-    m_vecXAccZ.append(0);
-    m_vecXGyroX.append(0);
-    m_vecXGyroY.append(0);
-    m_vecXGyroZ.append(0);
+    m_vecX.append(0);
 
     m_vecAccX.append(0);
     m_vecAccY.append(0);
@@ -42,15 +32,15 @@ ClientView::ClientView(QWidget *parent)
     m_plotAcc->addGraph();
     m_plotAcc->graph(0)->setPen(QPen(QColor(Qt::blue)));
     m_plotAcc->graph(0)->setName("Acceleration X");
-    m_plotAcc->graph(0)->setData(m_vecXAccX, m_vecAccX);
+    m_plotAcc->graph(0)->setData(m_vecX, m_vecAccX);
     m_plotAcc->addGraph();
     m_plotAcc->graph(1)->setPen(QPen(QColor(Qt::red)));
     m_plotAcc->graph(1)->setName("Acceleration Y");
-    m_plotAcc->graph(1)->setData(m_vecXAccY, m_vecAccY);
+    m_plotAcc->graph(1)->setData(m_vecX, m_vecAccY);
     m_plotAcc->addGraph();
     m_plotAcc->graph(2)->setPen(QPen(QColor(Qt::green)));
     m_plotAcc->graph(2)->setName("Acceleration Z");
-    m_plotAcc->graph(2)->setData(m_vecXAccZ, m_vecAccZ);
+    m_plotAcc->graph(2)->setData(m_vecX, m_vecAccZ);
     m_plotAcc->xAxis->setLabel("time");
     m_plotAcc->yAxis->setLabel("magnitude");
 
@@ -65,15 +55,15 @@ ClientView::ClientView(QWidget *parent)
     m_plotGyro->addGraph();
     m_plotGyro->graph(0)->setPen(QPen(QColor(Qt::blue)));
     m_plotGyro->graph(0)->setName("Angular speed X");
-    m_plotGyro->graph(0)->setData(m_vecXGyroX, m_vecGyroX);
+    m_plotGyro->graph(0)->setData(m_vecX, m_vecGyroX);
     m_plotGyro->addGraph();
     m_plotGyro->graph(1)->setPen(QPen(QColor(Qt::red)));
     m_plotGyro->graph(1)->setName("Angular speed Y");
-    m_plotGyro->graph(1)->setData(m_vecXGyroY, m_vecGyroY);
+    m_plotGyro->graph(1)->setData(m_vecX, m_vecGyroY);
     m_plotGyro->addGraph();
     m_plotGyro->graph(2)->setPen(QPen(QColor(Qt::green)));
     m_plotGyro->graph(2)->setName("Angular speed Z");
-    m_plotGyro->graph(2)->setData(m_vecXGyroZ, m_vecGyroZ);
+    m_plotGyro->graph(2)->setData(m_vecX, m_vecGyroZ);
     m_plotGyro->xAxis->setLabel("time");
     m_plotGyro->yAxis->setLabel("magnitude");
 
@@ -144,74 +134,48 @@ void ClientView::slotUpdateGraphView()
 
     AddValuesToAccVector(vecAccX, vecAccY, vecAccZ);
     AddValuesToGyroVector(vecGyroX, vecGyroY, vecGyroZ);
+    ControlVectorsSize();
 
-    m_plotAcc->graph(0)->setData(m_vecXAccX, m_vecAccX);
-    m_plotAcc->graph(1)->setData(m_vecXAccY, m_vecAccY);
-    m_plotAcc->graph(2)->setData(m_vecXAccZ, m_vecAccZ);
+    m_plotAcc->graph(0)->setData(m_vecX, m_vecAccX);
+    m_plotAcc->graph(1)->setData(m_vecX, m_vecAccY);
+    m_plotAcc->graph(2)->setData(m_vecX, m_vecAccZ);
     m_plotAcc->replot();
     m_plotAcc->rescaleAxes();
 
-    m_plotGyro->graph(0)->setData(m_vecXGyroX, m_vecGyroX);
-    m_plotGyro->graph(1)->setData(m_vecXGyroY, m_vecGyroY);
-    m_plotGyro->graph(2)->setData(m_vecXGyroZ, m_vecGyroZ);
+    m_plotGyro->graph(0)->setData(m_vecX, m_vecGyroX);
+    m_plotGyro->graph(1)->setData(m_vecX, m_vecGyroY);
+    m_plotGyro->graph(2)->setData(m_vecX, m_vecGyroZ);
     m_plotGyro->replot();
     m_plotGyro->rescaleAxes();
 }
 
 void ClientView::AddValuesToAccVector(int nAccX, int nAccY, int nAccZ)
 {
-        m_vecXAccX.append(m_fCurrentXAccX);
-        m_vecXAccY.append(m_fCurrentXAccY);
-        m_vecXAccZ.append(m_fCurrentXAccZ);
+        m_vecX.append(m_fCurrentX);
         m_vecAccX.append(nAccX);
         m_vecAccY.append(nAccY);
         m_vecAccZ.append(nAccZ);
-        if (m_vecXAccX.size() > SIZE_SET) {
-            m_vecXAccX.pop_front();
+        if (m_vecX.size() > SIZE_SET) {
+            m_vecX.pop_front();
             m_vecAccX.pop_front();
-        }
-
-        if (m_vecXAccY.size() > SIZE_SET) {
-            m_vecXAccY.pop_front();
             m_vecAccY.pop_front();
-        }
-
-        if (m_vecXAccZ.size() > SIZE_SET) {
-            m_vecXAccZ.pop_front();
             m_vecAccZ.pop_front();
         }
 
-        m_fCurrentXAccX++;
-        m_fCurrentXAccY++;
-        m_fCurrentXAccZ++;
+        m_fCurrentX++;
 }
 
 void ClientView::AddValuesToGyroVector(int nGyroX, int nGyroY, int nGyroZ)
 {
-        m_vecXGyroX.append(m_fCurrentXGyroX);
-        m_vecXGyroY.append(m_fCurrentXGyroY);
-        m_vecXGyroZ.append(m_fCurrentXGyroZ);
         m_vecGyroX.append(nGyroX);
         m_vecGyroY.append(nGyroY);
         m_vecGyroZ.append(nGyroZ);
 
-        if (m_vecXGyroX.size() > SIZE_SET) {
-            m_vecXGyroX.pop_front();
+        if (m_vecGyroX.size() > SIZE_SET) {
             m_vecGyroX.pop_front();
-        }
-
-        if (m_vecXGyroY.size() > SIZE_SET) {
-            m_vecXGyroY.pop_front();
             m_vecGyroY.pop_front();
-        }
-
-        if (m_vecXGyroZ.size() > SIZE_SET) {
-            m_vecXGyroZ.pop_front();
             m_vecGyroZ.pop_front();
         }
-        m_fCurrentXGyroX++;
-        m_fCurrentXGyroY++;
-        m_fCurrentXGyroZ++;
 }
 
 void ClientView::AddValuesToAccVector(QVector<double> vecAccX,
@@ -222,32 +186,9 @@ void ClientView::AddValuesToAccVector(QVector<double> vecAccX,
     m_vecAccY += vecAccY;
     m_vecAccZ += vecAccZ;
 
-    while (m_fCurrentXAccX++ < m_vecAccX.size()) {
-        m_vecXAccX.append(m_fCurrentXAccX);
+    for (int i = 0; i < vecAccX.size(); i++) {
+        m_vecX.append(++m_fCurrentX);
     }
-
-    while (m_fCurrentXAccY++ < m_vecAccY.size()) {
-        m_vecXAccY.append(m_fCurrentXAccY);
-    }
-
-    while (m_fCurrentXAccZ++ < m_vecAccZ.size()) {
-        m_vecXAccZ.append(m_fCurrentXAccZ);
-    }
-
-//    if (m_vecXAccX.size() > SIZE_SET) {
-//        m_vecXAccX.erase(m_vecXAccX.begin(), m_vecXAccX.begin() + (m_vecXAccX.size() - SIZE_SET));
-//        m_vecAccX.erase(m_vecAccX.begin(), m_vecAccX.begin() + (m_vecAccX.size() - SIZE_SET));
-//    }
-
-//    if (m_vecXAccY.size() > SIZE_SET) {
-//        m_vecXAccY.erase(m_vecXAccY.begin(), m_vecXAccY.begin() + (m_vecXAccY.size() - SIZE_SET));
-//        m_vecAccY.erase(m_vecAccY.begin(), m_vecAccY.begin() + (m_vecAccY.size() - SIZE_SET));
-//    }
-
-//    if (m_vecXAccZ.size() > SIZE_SET) {
-//        m_vecXAccZ.erase(m_vecXAccZ.begin(), m_vecXAccZ.begin() + (m_vecXAccZ.size() - SIZE_SET));
-//        m_vecAccZ.erase(m_vecAccZ.begin(), m_vecAccZ.begin() + (m_vecAccZ.size() - SIZE_SET));
-//    }
 }
 
 void ClientView::AddValuesToGyroVector(QVector<double> vecGyroX,
@@ -257,31 +198,19 @@ void ClientView::AddValuesToGyroVector(QVector<double> vecGyroX,
     m_vecGyroX += vecGyroX;
     m_vecGyroY += vecGyroY;
     m_vecGyroZ += vecGyroZ;
+}
 
-    while (m_fCurrentXGyroX++ < m_vecGyroX.size()) {
-        m_vecXGyroX.append(m_fCurrentXGyroX);
-    }
+void ClientView::ControlVectorsSize()
+{
+      if (m_vecX.size() > SIZE_SET) {
+          m_vecX.erase(m_vecX.begin(), m_vecX.begin() + (m_vecX.size() - SIZE_SET));
 
-    while (m_fCurrentXGyroY++ < m_vecGyroY.size()) {
-        m_vecXGyroY.append(m_fCurrentXGyroY);
-    }
+          m_vecGyroX.erase(m_vecGyroX.begin(), m_vecGyroX.begin() + (m_vecGyroX.size() - SIZE_SET));
+          m_vecGyroY.erase(m_vecGyroY.begin(), m_vecGyroY.begin() + (m_vecGyroY.size() - SIZE_SET));
+          m_vecGyroZ.erase(m_vecGyroZ.begin(), m_vecGyroZ.begin() + (m_vecGyroZ.size() - SIZE_SET));
 
-    while (m_fCurrentXGyroZ++ < m_vecGyroZ.size()) {
-        m_vecXGyroZ.append(m_fCurrentXGyroZ);
-    }
-
-//    if (m_vecXGyroX.size() > SIZE_SET) {
-//        m_vecXGyroX.erase(m_vecXGyroX.begin(), m_vecXGyroX.begin() + (m_vecXGyroX.size() - SIZE_SET));
-//        m_vecGyroX.erase(m_vecGyroX.begin(), m_vecGyroX.begin() + (m_vecGyroX.size() - SIZE_SET));
-//    }
-
-//    if (m_vecXGyroY.size() > SIZE_SET) {
-//        m_vecXGyroY.erase(m_vecXGyroY.begin(), m_vecXGyroY.begin() + (m_vecXGyroY.size() - SIZE_SET));
-//        m_vecGyroY.erase(m_vecGyroY.begin(), m_vecGyroY.begin() + (m_vecGyroY.size() - SIZE_SET));
-//    }
-
-//    if (m_vecXGyroZ.size() > SIZE_SET) {
-//        m_vecXGyroZ.erase(m_vecXGyroZ.begin(), m_vecXGyroZ.begin() + (m_vecXGyroZ.size() - SIZE_SET));
-//        m_vecGyroZ.erase(m_vecGyroZ.begin(), m_vecGyroZ.begin() + (m_vecGyroZ.size() - SIZE_SET));
-//    }
+          m_vecAccX.erase(m_vecAccX.begin(), m_vecAccX.begin() + (m_vecAccX.size() - SIZE_SET));
+          m_vecAccY.erase(m_vecAccY.begin(), m_vecAccY.begin() + (m_vecAccY.size() - SIZE_SET));
+          m_vecAccZ.erase(m_vecAccZ.begin(), m_vecAccZ.begin() + (m_vecAccZ.size() - SIZE_SET));
+      }
 }

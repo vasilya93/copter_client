@@ -24,8 +24,8 @@ public:
     void SetPitch(float fPitch);
     void SetYaw(float fYaw);
 
-    void GetAcc(int &nAccX, int &nAccY, int &nAccZ) const;
-    void GetGyro(int &nGyroX, int &nGyroY, int &nGyroZ) const;
+    void GetAcc(int &nAccX, int &nAccY, int &nAccZ);
+    void GetGyro(int &nGyroX, int &nGyroY, int &nGyroZ);
     void GetAccVectorUnread(std::vector<double> &vecAccX,
                             std::vector<double> &vecAccY,
                             std::vector<double> &vecAccZ);
@@ -104,6 +104,7 @@ private:
     int GetWindowMedian(int *pWindow);
     int GetWindowAverage(int *pWindow);
     void TryFusion();
+    void TryExpose();
 
 private:
     enum {
@@ -117,6 +118,14 @@ private:
         ROLL_RENEWED = 1 << 7,
         PITCH_RENEWED = 1 << 8,
         YAW_RENEWED = 1 << 9
+    };
+    enum {
+        ACCX_NOT_EXPOSED = 1 << 0,
+        ACCY_NOT_EXPOSED = 1 << 1,
+        ACCZ_NOT_EXPOSED = 1 << 2,
+        GYROX_NOT_EXPOSED = 1 << 3,
+        GYROY_NOT_EXPOSED = 1 << 4,
+        GYROZ_NOT_EXPOSED = 1 << 5
     };
     enum FiltrationType {
         FILTRATION_MEDIAN,
@@ -145,6 +154,7 @@ private:
         m_nGyroYLast,
         m_nGyroZLast;
     int m_nRenewStatus;
+    int m_nExposeStatus;
 
     //----Calibration elements----
     int m_nAccXCalibrationAccum,

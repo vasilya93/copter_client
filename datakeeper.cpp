@@ -12,6 +12,7 @@ DataKeeper::DataKeeper() :
     m_nGyroYLast(0),
     m_nGyroZLast(0),
     m_nRenewStatus(0),
+    m_nExposeStatus(0),
     m_nAccXCalibrationAccum(0),
     m_nAccYCalibrationAccum(0),
     m_nAccZCalibrationAccum(0),
@@ -70,9 +71,10 @@ void DataKeeper::SetGyroX(int nGyroX)
     int nAlignedGyroX = nGyroX + m_nGyroXOffset;
     m_nGyroXLast = FilterValue(nAlignedGyroX, &m_fifoGyroXFiltration);
     m_vecGyroX.push_back(m_nGyroXLast);
-    m_vecGyroXUnread.push_back((double)m_nGyroXLast);
     m_nRenewStatus |= GYROX_RENEWED;
-    
+    m_nExposeStatus |= GYROX_NOT_EXPOSED;
+
+    TryExpose();
     //TryFusion();
 }
 
@@ -88,9 +90,10 @@ void DataKeeper::SetGyroY(int nGyroY)
     int nAlignedGyroY = nGyroY + m_nGyroYOffset;
     m_nGyroYLast = FilterValue(nAlignedGyroY, &m_fifoGyroYFiltration);
     m_vecGyroY.push_back(m_nGyroYLast);
-    m_vecGyroYUnread.push_back((double)m_nGyroYLast);
     m_nRenewStatus |= GYROY_RENEWED;
-    
+    m_nExposeStatus |= GYROY_NOT_EXPOSED;
+
+    TryExpose();
     //TryFusion();
 }
 
@@ -106,9 +109,10 @@ void DataKeeper::SetGyroZ(int nGyroZ)
     int nAlignedGyroZ = nGyroZ + m_nGyroZOffset;
     m_nGyroZLast = FilterValue(nAlignedGyroZ, &m_fifoGyroZFiltration);
     m_vecGyroZ.push_back(m_nGyroZLast);
-    m_vecGyroZUnread.push_back((double)m_nGyroZLast);
     m_nRenewStatus |= GYROZ_RENEWED;
-    
+    m_nExposeStatus |= GYROZ_NOT_EXPOSED;
+
+    TryExpose();
     //TryFusion();
 }
 
@@ -124,8 +128,10 @@ void DataKeeper::SetAccX(int nAccX)
     int nAlignedAccX = nAccX + m_nAccXOffset;
     m_nAccXLast = FilterValue(nAlignedAccX, &m_fifoAccXFiltration);
     m_vecAccX.push_back(m_nAccXLast);
-    m_vecAccXUnread.push_back((double)m_nAccXLast);
     m_nRenewStatus |= ACCX_RENEWED;
+    m_nExposeStatus |= ACCX_NOT_EXPOSED;
+
+    TryExpose();
     //TryFusion();
 }
 
@@ -141,8 +147,10 @@ void DataKeeper::SetAccY(int nAccY)
     int nAlignedAccY = nAccY + m_nAccYOffset;
     m_nAccYLast = FilterValue(nAlignedAccY, &m_fifoAccYFiltration);
     m_vecAccY.push_back(m_nAccYLast);
-    m_vecAccYUnread.push_back((double)m_nAccYLast);
     m_nRenewStatus |= ACCY_RENEWED;
+    m_nExposeStatus |= ACCY_NOT_EXPOSED;
+
+    TryExpose();
     //TryFusion();
 }
 
@@ -158,8 +166,10 @@ void DataKeeper::SetAccZ(int nAccZ)
     int nAlignedAccZ = nAccZ + m_nAccZOffset;
     m_nAccZLast = FilterValue(nAlignedAccZ, &m_fifoAccZFiltration);
     m_vecAccZ.push_back(m_nAccZLast);
-    m_vecAccZUnread.push_back((double)m_nAccZLast);
     m_nRenewStatus |= ACCZ_RENEWED;
+    m_nExposeStatus |= ACCZ_NOT_EXPOSED;
+
+    TryExpose();
     //TryFusion();
 }
 
@@ -181,22 +191,22 @@ void DataKeeper::SetYaw(float fYaw)
     m_nRenewStatus |= YAW_RENEWED;
 }
 
-void DataKeeper::GetAcc(int &nAccX, int &nAccY, int &nAccZ) const
+void DataKeeper::GetAcc(int &nAccX, int &nAccY, int &nAccZ)
 {
     nAccX = m_nAccXLast;
     nAccY = m_nAccYLast;
     nAccZ = m_nAccZLast;
 
-    //m_nRenewStatus &= ~(ACCX_RENEWED | ACCY_RENEWED | ACCZ_RENEWED);
+    m_nRenewStatus &= ~(ACCX_RENEWED | ACCY_RENEWED | ACCZ_RENEWED);
 }
 
-void DataKeeper::GetGyro(int &nGyroX, int &nGyroY, int &nGyroZ) const
+void DataKeeper::GetGyro(int &nGyroX, int &nGyroY, int &nGyroZ)
 {
     nGyroX = m_nGyroXLast;
     nGyroY = m_nGyroYLast;
     nGyroZ = m_nGyroZLast;
 
-    //m_nRenewStatus &= ~(GYROX_RENEWED | GYROY_RENEWED | GYROZ_RENEWED);
+    m_nRenewStatus &= ~(GYROX_RENEWED | GYROY_RENEWED | GYROZ_RENEWED);
 }
 
 void DataKeeper::GetAccVectorUnread(std::vector<double> &vecAccX,
@@ -357,6 +367,26 @@ void DataKeeper::TryFusion()
 
     m_nRenewStatus |= DCM_RENEWED;
     m_nRenewStatus |= ROLL_RENEWED | PITCH_RENEWED | YAW_RENEWED;
+}
+
+void DataKeeper::TryExpose()
+{
+    if ((~m_nExposeStatus & ACCX_NOT_EXPOSED) ||
+        (~m_nExposeStatus & ACCY_NOT_EXPOSED) ||
+        (~m_nExposeStatus & ACCZ_NOT_EXPOSED) ||
+        (~m_nExposeStatus & GYROX_NOT_EXPOSED) ||
+        (~m_nExposeStatus & GYROY_NOT_EXPOSED) ||
+        (~m_nExposeStatus & GYROZ_NOT_EXPOSED))
+        return;
+
+    m_vecAccXUnread.push_back((double)m_nAccXLast);
+    m_vecAccYUnread.push_back((double)m_nAccYLast);
+    m_vecAccZUnread.push_back((double)m_nAccZLast);
+    m_vecGyroXUnread.push_back((double)m_nGyroXLast);
+    m_vecGyroYUnread.push_back((double)m_nGyroYLast);
+    m_vecGyroZUnread.push_back((double)m_nGyroZLast);
+
+    m_nExposeStatus = 0;
 }
 
 int compare(const void * a, const void * b)

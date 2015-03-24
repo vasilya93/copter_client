@@ -32,6 +32,7 @@ private:
     void AddValuesToGyroVector(QVector<double> vecGyroX,
                                QVector<double> vecGyroY,
                                QVector<double> vecGyroZ);
+    void ControlVectorsSize();
 
 private:
     QLabel *m_pLabelTimeGap;
@@ -44,13 +45,7 @@ private:
                          *m_pIndicatorYaw;
     QTimer *m_pTimerRedraw;
 
-    QVector<double> m_vecXAccX;
-    QVector<double> m_vecXAccY;
-    QVector<double> m_vecXAccZ;
-
-    QVector<double> m_vecXGyroX;
-    QVector<double> m_vecXGyroY;
-    QVector<double> m_vecXGyroZ;
+    QVector<double> m_vecX;
 
     QVector<double> m_vecAccX;
     QVector<double> m_vecAccY;
@@ -58,12 +53,7 @@ private:
     QVector<double> m_vecGyroX;
     QVector<double> m_vecGyroY;
     QVector<double> m_vecGyroZ;
-    double m_fCurrentXAccX,
-           m_fCurrentXAccY,
-           m_fCurrentXAccZ,
-           m_fCurrentXGyroX,
-           m_fCurrentXGyroY,
-           m_fCurrentXGyroZ;
+    double m_fCurrentX;
     CommManager *m_pCommManager;
 
     bool m_bDoAllowEdit;
