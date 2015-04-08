@@ -71,6 +71,7 @@ ClientView::ClientView(QWidget *parent)
     m_plotGyro->replot();
 
     m_pButtonSendStart = new QPushButton("Start");
+    m_pButtonWriteLog = new QPushButton("Write Log");
 
     m_pLabelTimeGap = new QLabel("No timegap");
     m_pLabelTimeGap->setFixedHeight(20);
@@ -83,10 +84,14 @@ ClientView::ClientView(QWidget *parent)
     m_pIndicatorPitch = new OrientationIndicator;
     m_pIndicatorYaw = new OrientationIndicator;
 
+    QHBoxLayout *layoutButtons = new QHBoxLayout;
+    layoutButtons->addWidget(m_pButtonSendStart);
+    layoutButtons->addWidget(m_pButtonWriteLog);
+
     QVBoxLayout *layoutFirstColumn = new QVBoxLayout;
     layoutFirstColumn->addWidget(m_plotAcc);
     layoutFirstColumn->addWidget(m_plotGyro);
-    layoutFirstColumn->addWidget(m_pButtonSendStart);
+    layoutFirstColumn->addLayout(layoutButtons);
     layoutFirstColumn->addWidget(m_pLabelTimeGap);
 
     QVBoxLayout *layoutSecondColumn = new QVBoxLayout;
@@ -100,9 +105,9 @@ ClientView::ClientView(QWidget *parent)
     layout->addLayout(layoutSecondColumn, 1);
     setLayout(layout);
 
-
     connect(m_pTimerRedraw, SIGNAL(timeout()), this, SLOT(slotUpdateGraphView()));
     connect(m_pButtonSendStart, SIGNAL(clicked()), this, SLOT(slotSendStart()));
+    connect(m_pButtonWriteLog, SIGNAL(clicked()), this, SLOT(slotWriteLog()));
 
     m_pCommManager->Connect();
 
@@ -122,6 +127,11 @@ ClientView::~ClientView()
 void ClientView::slotSendStart()
 {
     m_pCommManager->StartConnection();
+}
+
+void ClientView::slotWriteLog()
+{
+    m_pCommManager->WriteLog();
 }
 
 void ClientView::slotUpdateGraphView()

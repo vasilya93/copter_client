@@ -49,6 +49,26 @@ void CommManager::StartConnection()
     m_pSerialComm->Write("start", 5);
 }
 
+void CommManager::WriteLog()
+{
+    m_pDataKeeper->DisableLoggingData();
+
+    m_logWriter.LogData(m_pDataKeeper->GetAccX(), "log_acc_x");
+    m_logWriter.LogDataBinary(m_pDataKeeper->GetAccX(), "log_bin_acc_x");
+    m_logWriter.LogData(m_pDataKeeper->GetAccY(), "log_acc_y");
+    m_logWriter.LogDataBinary(m_pDataKeeper->GetAccY(), "log_bin_acc_y");
+    m_logWriter.LogData(m_pDataKeeper->GetAccZ(), "log_acc_z");
+    m_logWriter.LogDataBinary(m_pDataKeeper->GetAccZ(), "log_bin_acc_z");
+    m_logWriter.LogData(m_pDataKeeper->GetGyroX(), "log_gyro_x");
+    m_logWriter.LogDataBinary(m_pDataKeeper->GetGyroX(), "log_bin_gyro_x");
+    m_logWriter.LogData(m_pDataKeeper->GetGyroY(), "log_gyro_y");
+    m_logWriter.LogDataBinary(m_pDataKeeper->GetGyroY(), "log_bin_gyro_y");
+    m_logWriter.LogData(m_pDataKeeper->GetGyroZ(), "log_gyro_z");
+    m_logWriter.LogDataBinary(m_pDataKeeper->GetGyroZ(), "log_bin_gyro_z");
+
+    m_pDataKeeper->EnableLoggingData();
+}
+
 void CommManager::SerialBytesReceivedHandler(unsigned char *pBytesReceived, unsigned int nSize)
 {
     m_pPacketManager->PushReceived(pBytesReceived, nSize);

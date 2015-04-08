@@ -6,6 +6,7 @@
 #include "SerialComm.h"
 #include "packetmanager.h"
 #include "datakeeper.h"
+#include "logwriter.h"
 #include "vec3.h"
 
 class CommManager : public QObject, protected SerialCommSubscribable
@@ -33,6 +34,7 @@ public:
     void GetGyroUnread(QVector<double> &vecGyroX, QVector<double> &vecGyroY, QVector<double> &vecGyroZ);
 
     void StartConnection();
+    void WriteLog();
 
 protected:
     virtual void SerialBytesReceivedHandler(unsigned char*, unsigned int);
@@ -42,6 +44,7 @@ private:
     SerialComm *m_pSerialComm;
     PacketManager *m_pPacketManager;
     DataKeeper *m_pDataKeeper;
+    LogWriter m_logWriter;
 
     const char* PORT_NAME = "/dev/ttyS0";
 };

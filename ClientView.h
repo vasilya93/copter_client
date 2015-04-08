@@ -21,6 +21,7 @@ public:
 
 public slots:
     void slotSendStart();
+    void slotWriteLog();
     void slotUpdateGraphView();
 
 private:
@@ -39,7 +40,8 @@ private:
     QCustomPlot *m_plotAcc;
     QCustomPlot *m_plotGyro;
     QTextEdit *m_editDCM;
-    QPushButton *m_pButtonSendStart;
+    QPushButton *m_pButtonSendStart,
+                *m_pButtonWriteLog;
     OrientationIndicator *m_pIndicatorRoll,
                          *m_pIndicatorPitch,
                          *m_pIndicatorYaw;

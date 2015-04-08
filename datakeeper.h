@@ -32,6 +32,15 @@ public:
     void GetGyroVectorUnread(std::vector<double> &vecGyroX,
                              std::vector<double> &vecGyroY,
                              std::vector<double> &vecGyroZ);
+public:
+    inline void EnableLoggingData()
+    {
+        m_bIsLoggingEnabled = true;
+    }
+    inline void DisableLoggingData()
+    {
+        m_bIsLoggingEnabled = false;
+    }
 
 public:
     inline void ClearAccXUnread()
@@ -82,6 +91,31 @@ public:
     inline const std::vector<double> &GetGyroZUnread()
     {
         return m_vecGyroZUnread;
+    }
+
+    inline const std::vector<int> &GetAccX()
+    {
+        return m_vecAccX;
+    }
+    inline const std::vector<int> &GetAccY()
+    {
+        return m_vecAccY;
+    }
+    inline const std::vector<int> &GetAccZ()
+    {
+        return m_vecAccZ;
+    }
+    inline const std::vector<int> &GetGyroX()
+    {
+        return m_vecGyroX;
+    }
+    inline const std::vector<int> &GetGyroY()
+    {
+        return m_vecGyroY;
+    }
+    inline const std::vector<int> &GetGyroZ()
+    {
+        return m_vecGyroZ;
     }
 public:
     void ClearData();
@@ -157,6 +191,8 @@ private:
         m_nGyroZLast;
     int m_nRenewStatus;
     int m_nExposeStatus;
+
+    bool m_bIsLoggingEnabled;
 
     //----Calibration elements----
     int m_nAccXCalibrationAccum,

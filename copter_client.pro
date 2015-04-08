@@ -21,7 +21,8 @@ SOURCES += main.cpp\
     packetmanager.cpp \
     datakeeper.cpp \
     vec3.cpp \
-    orientationindicator.cpp
+    orientationindicator.cpp \
+    logwriter.cpp
 
 HEADERS  += ClientView.h \
     fifo.h \
@@ -31,6 +32,7 @@ HEADERS  += ClientView.h \
     packetmanager.h \
     datakeeper.h \
     vec3.h \
-    orientationindicator.h
+    orientationindicator.h \
+    logwriter.h
 
 QMAKE_CXXFLAGS += -std=c++11

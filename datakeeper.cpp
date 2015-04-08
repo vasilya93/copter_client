@@ -13,6 +13,7 @@ DataKeeper::DataKeeper() :
     m_nGyroZLast(0),
     m_nRenewStatus(0),
     m_nExposeStatus(0),
+    m_bIsLoggingEnabled(true),
     m_nAccXCalibrationAccum(0),
     m_nAccYCalibrationAccum(0),
     m_nAccZCalibrationAccum(0),
@@ -70,7 +71,9 @@ void DataKeeper::SetGyroX(int nGyroX)
 
     int nAlignedGyroX = nGyroX + m_nGyroXOffset;
     m_nGyroXLast = FilterValue(nAlignedGyroX, &m_fifoGyroXFiltration);
-    m_vecGyroX.push_back(m_nGyroXLast);
+    if (m_bIsLoggingEnabled) {
+        m_vecGyroX.push_back(m_nGyroXLast);
+    }
     m_nRenewStatus |= GYROX_RENEWED;
     m_nExposeStatus |= GYROX_NOT_EXPOSED;
 
@@ -89,7 +92,9 @@ void DataKeeper::SetGyroY(int nGyroY)
 
     int nAlignedGyroY = nGyroY + m_nGyroYOffset;
     m_nGyroYLast = FilterValue(nAlignedGyroY, &m_fifoGyroYFiltration);
-    m_vecGyroY.push_back(m_nGyroYLast);
+    if (m_bIsLoggingEnabled) {
+        m_vecGyroY.push_back(m_nGyroYLast);
+    }
     m_nRenewStatus |= GYROY_RENEWED;
     m_nExposeStatus |= GYROY_NOT_EXPOSED;
 
@@ -108,7 +113,9 @@ void DataKeeper::SetGyroZ(int nGyroZ)
 
     int nAlignedGyroZ = nGyroZ + m_nGyroZOffset;
     m_nGyroZLast = FilterValue(nAlignedGyroZ, &m_fifoGyroZFiltration);
-    m_vecGyroZ.push_back(m_nGyroZLast);
+    if (m_bIsLoggingEnabled) {
+        m_vecGyroZ.push_back(m_nGyroZLast);
+    }
     m_nRenewStatus |= GYROZ_RENEWED;
     m_nExposeStatus |= GYROZ_NOT_EXPOSED;
 
@@ -127,7 +134,9 @@ void DataKeeper::SetAccX(int nAccX)
 
     int nAlignedAccX = nAccX + m_nAccXOffset;
     m_nAccXLast = FilterValue(nAlignedAccX, &m_fifoAccXFiltration);
-    m_vecAccX.push_back(m_nAccXLast);
+    if (m_bIsLoggingEnabled) {
+        m_vecAccX.push_back(m_nAccXLast);
+    }
     m_nRenewStatus |= ACCX_RENEWED;
     m_nExposeStatus |= ACCX_NOT_EXPOSED;
 
@@ -146,7 +155,9 @@ void DataKeeper::SetAccY(int nAccY)
 
     int nAlignedAccY = nAccY + m_nAccYOffset;
     m_nAccYLast = FilterValue(nAlignedAccY, &m_fifoAccYFiltration);
-    m_vecAccY.push_back(m_nAccYLast);
+    if (m_bIsLoggingEnabled) {
+        m_vecAccY.push_back(m_nAccYLast);
+    }
     m_nRenewStatus |= ACCY_RENEWED;
     m_nExposeStatus |= ACCY_NOT_EXPOSED;
 
@@ -165,7 +176,9 @@ void DataKeeper::SetAccZ(int nAccZ)
 
     int nAlignedAccZ = nAccZ + m_nAccZOffset;
     m_nAccZLast = FilterValue(nAlignedAccZ, &m_fifoAccZFiltration);
-    m_vecAccZ.push_back(m_nAccZLast);
+    if (m_bIsLoggingEnabled) {
+        m_vecAccZ.push_back(m_nAccZLast);
+    }
     m_nRenewStatus |= ACCZ_RENEWED;
     m_nExposeStatus |= ACCZ_NOT_EXPOSED;
 
